@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}登录 - NovaCloud{% endblock %}
+
+{% block content %}
+<div class="auth-form login-form">
+    <h2>登录</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="id_username">用户名或邮箱</label>
+            {{ form.username }}
+        </div>
+        <div class="form-group">
+            <label for="id_password">密码</label>
+            {{ form.password }}
+        </div>
+        {% if form.errors %}
+            <div class="form-errors">
+                <p>用户名或密码不正确，请重试。</p>
+            </div>
+        {% endif %}
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">登录</button>
+        </div>
+    </form>
+    <div class="auth-links">
+        <p>没有账号？<a href="{% url 'accounts:register' %}">注册</a></p>
+    </div>
+</div>
+{% endblock %} 
