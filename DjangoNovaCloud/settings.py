@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'accounts',
     'core',
     'iot_devices',
+    'mqtt_client',
 ]
 
 MIDDLEWARE = [
@@ -132,3 +133,26 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'accounts:login'
 LOGIN_REDIRECT_URL = 'core:index'
 LOGOUT_REDIRECT_URL = 'accounts:login'
+
+# MQTT配置
+# 使用公共MQTT服务器进行测试
+MQTT_CONFIG = {
+    'BROKER_HOST': 'broker.emqx.io',  # 公共MQTT服务器
+    'BROKER_PORT': 1883,              # 非TLS端口
+    'BROKER_PORT_TLS': 8883,          # TLS端口
+    'USE_TLS': False,                 # 初期测试暂不使用TLS
+    'KEEPALIVE': 60,                  # 保持连接时间（秒）
+    'CLIENT_ID_PREFIX': 'novacloud_server_',  # 客户端ID前缀，后面会加上随机字符串
+    'CLEAN_SESSION': True,
+    'QOS': 1,                         # 消息质量（0: 最多一次，1: 至少一次，2: 只有一次）
+    
+    # MQTT主题配置
+    'TOPIC_PREFIX': 'novacloud/',     # 所有主题的前缀
+    'DEVICE_DATA_TOPIC': 'devices/{device_id}/data',  # 设备数据上报主题模板
+    'DEVICE_STATUS_TOPIC': 'devices/{device_id}/status',  # 设备状态主题模板
+    'DEVICE_COMMAND_TOPIC': 'devices/{device_id}/command',  # 向设备发送命令的主题模板
+    'DEVICE_CONFIG_TOPIC': 'devices/{device_id}/config',  # 设备配置主题模板
+}
+
+# 是否在Django启动时自动连接MQTT
+MQTT_AUTO_CONNECT = True

@@ -507,4 +507,33 @@ a:hover {
     .actions {
         flex-wrap: wrap;
     }
+}
+
+/* 设备控制样式 */
+.device-controls {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.command-result {
+    margin: 15px 0;
+}
+
+.alert {
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+.alert-success {
+    background-color: rgba(46, 204, 113, 0.1);
+    border-left: 3px solid var(--success-color);
+    color: var(--success-color);
+}
+
+.alert-danger {
+    background-color: rgba(231, 76, 60, 0.1);
+    border-left: 3px solid var(--error-color);
+    color: var(--error-color);
 } 

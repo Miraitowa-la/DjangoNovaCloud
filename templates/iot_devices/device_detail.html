@@ -92,6 +92,28 @@
         </div>
     </div>
     
+    <!-- 设备控制部分 -->
+    <div class="sub-section">
+        <div class="section-header">
+            <h2>设备控制</h2>
+        </div>
+        
+        <div class="device-controls">
+            <button class="btn btn-primary" id="btn-ping">
+                <i class="fas fa-satellite-dish"></i> Ping 设备
+            </button>
+            <button class="btn btn-warning" id="btn-reboot" onclick="return confirm('您确定要重启设备吗？')">
+                <i class="fas fa-power-off"></i> 重启设备
+            </button>
+        </div>
+        
+        <div class="command-result" id="command-result" style="display: none;">
+            <div class="alert" id="command-result-alert">
+                <span id="command-result-text"></span>
+            </div>
+        </div>
+    </div>
+    
     <!-- 传感器列表 -->
     <div class="sub-section">
         <div class="section-header">
@@ -172,4 +194,95 @@
         </a>
     </div>
 </div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const deviceId = '{{ device.device_id }}';
+        const btnPing = document.getElementById('btn-ping');
+        const btnReboot = document.getElementById('btn-reboot');
+        const commandResult = document.getElementById('command-result');
+        const commandResultAlert = document.getElementById('command-result-alert');
+        const commandResultText = document.getElementById('command-result-text');
+
+        // 获取CSRF Token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+
+        // 显示命令结果
+        function showCommandResult(message, isSuccess) {
+            commandResultText.textContent = message;
+            commandResultAlert.className = isSuccess ? 'alert alert-success' : 'alert alert-danger';
+            commandResult.style.display = 'block';
+            
+            // 3秒后自动隐藏
+            setTimeout(() => {
+                commandResult.style.display = 'none';
+            }, 3000);
+        }
+
+        // Ping设备
+        btnPing.addEventListener('click', function() {
+            fetch(`/api/devices/${deviceId}/ping/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showCommandResult(data.message, true);
+                } else {
+                    showCommandResult(data.message, false);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showCommandResult('发送命令时出错，请稍后重试', false);
+            });
+        });
+
+        // 重启设备
+        btnReboot.addEventListener('click', function() {
+            fetch(`/api/devices/${deviceId}/reboot/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showCommandResult(data.message, true);
+                } else {
+                    showCommandResult(data.message, false);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showCommandResult('发送命令时出错，请稍后重试', false);
+            });
+        });
+    });
+</script>
 {% endblock %} 
