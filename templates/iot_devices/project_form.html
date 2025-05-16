@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if form.instance.pk %}编辑项目{% else %}创建项目{% endif %} - NovaCloud{% endblock %}
+
+{% block content %}
+<div class="content-section">
+    <div class="form-header">
+        <h1>{% if form.instance.pk %}编辑项目{% else %}创建项目{% endif %}</h1>
+    </div>
+    
+    <div class="form-container">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.project_id.id_for_label }}">项目号</label>
+                {{ form.project_id }}
+                {% if form.project_id.help_text %}
+                    <small class="form-text text-muted">{{ form.project_id.help_text }}</small>
+                {% endif %}
+                {% if form.project_id.errors %}
+                    <div class="field-error">{{ form.project_id.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.name.id_for_label }}">项目名称</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <div class="field-error">{{ form.name.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.description.id_for_label }}">项目描述</label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <div class="field-error">{{ form.description.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-actions button-group">
+                <button type="submit" class="btn btn-primary">保存</button>
+                <a href="{% url 'iot_devices:project_list' %}" class="btn btn-light">取消</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}删除设备 - NovaCloud{% endblock %}
+
+{% block content %}
+<div class="content-section">
+    <div class="form-header">
+        <h1>删除设备</h1>
+    </div>
+    
+    <div class="alert alert-danger">
+        <p><strong>警告：</strong> 您确定要删除设备 "{{ object.name }}" ({{ object.device_id }}) 吗？</p>
+        <p>此操作将永久删除该设备及其所有传感器和执行器的数据，且无法恢复。</p>
+    </div>
+    
+    <div class="form-container">
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-danger">确认删除</button>
+                <a href="{% url 'iot_devices:device_detail' object.device_id %}" class="btn btn-light">取消</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

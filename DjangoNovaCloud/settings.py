@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     # 自定义应用
     'accounts',
     'core',
+    'iot_devices',
 ]
 
 MIDDLEWARE = [

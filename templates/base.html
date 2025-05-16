@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}NovaCloud - 云服务平台{% endblock %}</title>
     {% load static %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
@@ -17,6 +18,8 @@
                 <ul>
                     {% if user.is_authenticated %}
                         <li>欢迎，{{ user.username }}</li>
+                        <li><a href="{% url 'core:index' %}">首页</a></li>
+                        <li><a href="{% url 'iot_devices:project_list' %}">我的项目</a></li>
                         <li>
                             <form method="post" action="{% url 'accounts:logout' %}" class="logout-form">
                                 {% csrf_token %}

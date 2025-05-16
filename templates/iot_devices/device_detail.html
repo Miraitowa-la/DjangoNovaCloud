@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ device.name }} - NovaCloud{% endblock %}
+
+{% block content %}
+<div class="content-section">
+    <div class="section-header">
+        <h1>设备详情</h1>
+        <div class="header-actions">
+            <a href="{% url 'iot_devices:device_update' device.device_id %}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> 编辑设备
+            </a>
+            <a href="{% url 'iot_devices:device_delete' device.device_id %}" class="btn btn-danger">
+                <i class="fas fa-trash"></i> 删除设备
+            </a>
+        </div>
+    </div>
+    
+    <div class="detail-card">
+        <div class="detail-header">
+            <h2>{{ device.name }}</h2>
+            <span class="status-badge status-{{ device.status }}">
+                {% if device.status == 'online' %}
+                    在线
+                {% elif device.status == 'offline' %}
+                    离线
+                {% else %}
+                    未注册
+                {% endif %}
+            </span>
+        </div>
+        
+        <div class="detail-body">
+            <div class="detail-row">
+                <div class="detail-label">设备号:</div>
+                <div class="detail-value">{{ device.device_id }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">设备标识:</div>
+                <div class="detail-value">{{ device.device_identifier }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">名称:</div>
+                <div class="detail-value">{{ device.name }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">设备密钥:</div>
+                <div class="detail-value device-key-container">
+                    <code class="device-key">{{ device.device_key }}</code>
+                    <form method="post" action="{% url 'iot_devices:regenerate_device_key' device.device_id %}" class="inline-form">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('您确定要重新生成设备密钥吗？此操作会使当前密钥失效。')">
+                            <i class="fas fa-sync-alt"></i> 重新生成
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">所属项目:</div>
+                <div class="detail-value">
+                    <a href="{% url 'iot_devices:project_detail' device.project.project_id %}">
+                        {{ device.project.name }} ({{ device.project.project_id }})
+                    </a>
+                </div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">状态:</div>
+                <div class="detail-value">
+                    <span class="status-badge status-{{ device.status }}">
+                        {% if device.status == 'online' %}
+                            在线
+                        {% elif device.status == 'offline' %}
+                            离线
+                        {% else %}
+                            未注册
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">最后在线时间:</div>
+                <div class="detail-value">{{ device.last_seen|default_if_none:"尚未上线"|date:"Y-m-d H:i" }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">创建时间:</div>
+                <div class="detail-value">{{ device.created_at|date:"Y-m-d H:i" }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">更新时间:</div>
+                <div class="detail-value">{{ device.updated_at|date:"Y-m-d H:i" }}</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 传感器列表 -->
+    <div class="sub-section">
+        <div class="section-header">
+            <h2>传感器列表</h2>
+            <!-- 此阶段仅显示，不提供添加功能 -->
+        </div>
+        
+        {% if sensors %}
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>名称</th>
+                            <th>类型</th>
+                            <th>单位</th>
+                            <th>值键名</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sensor in sensors %}
+                        <tr>
+                            <td>{{ sensor.name }}</td>
+                            <td>{{ sensor.sensor_type }}</td>
+                            <td>{{ sensor.unit|default:"-" }}</td>
+                            <td>{{ sensor.value_key }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="no-data">
+                <p>此设备还没有配置传感器。</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- 执行器列表 -->
+    <div class="sub-section">
+        <div class="section-header">
+            <h2>执行器列表</h2>
+            <!-- 此阶段仅显示，不提供添加功能 -->
+        </div>
+        
+        {% if actuators %}
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>名称</th>
+                            <th>类型</th>
+                            <th>命令键名</th>
+                            <th>当前状态</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for actuator in actuators %}
+                        <tr>
+                            <td>{{ actuator.name }}</td>
+                            <td>{{ actuator.actuator_type }}</td>
+                            <td>{{ actuator.command_key }}</td>
+                            <td>{{ actuator.current_state|default:"-" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="no-data">
+                <p>此设备还没有配置执行器。</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    <div class="back-link">
+        <a href="{% url 'iot_devices:project_detail' device.project.project_id %}" class="btn btn-light">
+            <i class="fas fa-arrow-left"></i> 返回项目详情
+        </a>
+    </div>
+</div>
+{% endblock %} 

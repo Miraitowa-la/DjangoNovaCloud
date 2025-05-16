@@ -172,6 +172,18 @@ a:hover {
     padding: 12px;
 }
 
+/* 按钮组样式 - 横向排列 */
+.button-group {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.button-group .btn {
+    flex: 1;
+    text-align: center;
+}
+
 .auth-links {
     text-align: center;
     margin-top: 20px;
@@ -277,5 +289,222 @@ a:hover {
     
     .dashboard-features {
         grid-template-columns: 1fr;
+    }
+}
+
+/* 添加物联网设备管理样式 */
+.content-section {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 25px;
+    margin-bottom: 30px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+
+.section-header h1, .section-header h2 {
+    margin: 0;
+    color: var(--primary-color);
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.data-table th, .data-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.data-table th {
+    background-color: #f8f9fa;
+    color: #495057;
+    font-weight: 600;
+}
+
+.data-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+.actions {
+    display: flex;
+    gap: 5px;
+}
+
+.btn-sm {
+    padding: 5px 10px;
+    font-size: 0.875rem;
+}
+
+.no-data {
+    text-align: center;
+    padding: 30px 20px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    margin: 20px 0;
+}
+
+.no-data p {
+    margin-bottom: 15px;
+    color: #6c757d;
+}
+
+.detail-card {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 10px;
+}
+
+.detail-header h2 {
+    margin: 0;
+    color: var(--primary-color);
+}
+
+.detail-row {
+    display: flex;
+    margin-bottom: 10px;
+    border-bottom: 1px dashed #eee;
+    padding-bottom: 10px;
+}
+
+.detail-label {
+    width: 140px;
+    font-weight: 600;
+    color: #495057;
+}
+
+.detail-value {
+    flex: 1;
+}
+
+.badge {
+    display: inline-block;
+    padding: 5px 10px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.375rem;
+}
+
+.badge-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 5px 10px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 0.375rem;
+}
+
+.status-online {
+    background-color: #2ecc71;
+    color: white;
+}
+
+.status-offline {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.status-unregistered {
+    background-color: #f39c12;
+    color: white;
+}
+
+.sub-section {
+    margin-top: 30px;
+}
+
+.back-link {
+    margin-top: 20px;
+}
+
+.device-key-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.device-key {
+    background-color: #f1f1f1;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-family: monospace;
+    overflow-x: auto;
+    max-width: 300px;
+}
+
+.inline-form {
+    display: inline-block;
+}
+
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+.alert-danger {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .detail-row {
+        flex-direction: column;
+    }
+    
+    .detail-label {
+        width: 100%;
+    }
+    
+    .device-key-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .actions {
+        flex-wrap: wrap;
     }
 } 

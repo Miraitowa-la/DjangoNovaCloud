@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ project.name }} - NovaCloud{% endblock %}
+
+{% block content %}
+<div class="content-section">
+    <div class="section-header">
+        <h1>项目详情</h1>
+        <div class="header-actions">
+            <a href="{% url 'iot_devices:project_update' project.project_id %}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> 编辑项目
+            </a>
+            <a href="{% url 'iot_devices:project_delete' project.project_id %}" class="btn btn-danger">
+                <i class="fas fa-trash"></i> 删除项目
+            </a>
+        </div>
+    </div>
+    
+    <div class="detail-card">
+        <div class="detail-header">
+            <h2>{{ project.name }}</h2>
+            <span class="badge badge-primary">{{ project.project_id }}</span>
+        </div>
+        
+        <div class="detail-body">
+            <div class="detail-row">
+                <div class="detail-label">项目号:</div>
+                <div class="detail-value">{{ project.project_id }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">名称:</div>
+                <div class="detail-value">{{ project.name }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">所有者:</div>
+                <div class="detail-value">{{ project.owner.username }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">创建时间:</div>
+                <div class="detail-value">{{ project.created_at|date:"Y-m-d H:i" }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">更新时间:</div>
+                <div class="detail-value">{{ project.updated_at|date:"Y-m-d H:i" }}</div>
+            </div>
+            {% if project.description %}
+            <div class="detail-row">
+                <div class="detail-label">描述:</div>
+                <div class="detail-value">{{ project.description }}</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="sub-section">
+        <div class="section-header">
+            <h2>设备列表</h2>
+            <a href="{% url 'iot_devices:device_create' project.project_id %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> 添加设备
+            </a>
+        </div>
+        
+        {% if devices %}
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>设备号</th>
+                            <th>设备名称</th>
+                            <th>状态</th>
+                            <th>最后在线时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for device in devices %}
+                        <tr>
+                            <td>{{ device.device_id }}</td>
+                            <td>{{ device.name }}</td>
+                            <td>
+                                <span class="status-badge status-{{ device.status }}">
+                                    {% if device.status == 'online' %}
+                                        在线
+                                    {% elif device.status == 'offline' %}
+                                        离线
+                                    {% else %}
+                                        未注册
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>{{ device.last_seen|default_if_none:"-"|date:"Y-m-d H:i" }}</td>
+                            <td class="actions">
+                                <a href="{% url 'iot_devices:device_detail' device.device_id %}" class="btn btn-info btn-sm" title="查看详情">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'iot_devices:device_update' device.device_id %}" class="btn btn-warning btn-sm" title="编辑">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'iot_devices:device_delete' device.device_id %}" class="btn btn-danger btn-sm" title="删除">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="no-data">
+                <p>此项目下还没有添加任何设备。</p>
+                <a href="{% url 'iot_devices:device_create' project.project_id %}" class="btn btn-primary">添加第一个设备</a>
+            </div>
+        {% endif %}
+    </div>
+    
+    <div class="back-link">
+        <a href="{% url 'iot_devices:project_list' %}" class="btn btn-light">
+            <i class="fas fa-arrow-left"></i> 返回项目列表
+        </a>
+    </div>
+</div>
+{% endblock %} 
