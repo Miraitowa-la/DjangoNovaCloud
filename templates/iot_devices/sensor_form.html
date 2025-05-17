@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if form.instance.id %}编辑传感器{% else %}添加传感器{% endif %} - NovaCloud{% endblock %}
+
+{% block content %}
+<div class="content-section">
+    <div class="section-header">
+        <h1>{% if form.instance.id %}编辑传感器{% else %}添加传感器{% endif %}</h1>
+    </div>
+    
+    <div class="form-container">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.name.id_for_label }}">传感器名称</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                <div class="field-error">{{ form.name.errors }}</div>
+                {% endif %}
+                {% if form.name.help_text %}
+                <div class="field-help">{{ form.name.help_text }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.sensor_type.id_for_label }}">传感器类型</label>
+                {{ form.sensor_type }}
+                {% if form.sensor_type.errors %}
+                <div class="field-error">{{ form.sensor_type.errors }}</div>
+                {% endif %}
+                {% if form.sensor_type.help_text %}
+                <div class="field-help">{{ form.sensor_type.help_text }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.unit.id_for_label }}">单位</label>
+                {{ form.unit }}
+                {% if form.unit.errors %}
+                <div class="field-error">{{ form.unit.errors }}</div>
+                {% endif %}
+                {% if form.unit.help_text %}
+                <div class="field-help">{{ form.unit.help_text }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.value_key.id_for_label }}">值键名</label>
+                {{ form.value_key }}
+                {% if form.value_key.errors %}
+                <div class="field-error">{{ form.value_key.errors }}</div>
+                {% endif %}
+                {% if form.value_key.help_text %}
+                <div class="field-help">{{ form.value_key.help_text }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-actions">
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">保存</button>
+                    <a href="{% url 'iot_devices:device_detail' device.device_id %}" class="btn btn-light">取消</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

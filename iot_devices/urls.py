@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import api_views
 
 app_name = 'iot_devices'
 
@@ -17,4 +18,20 @@ urlpatterns = [
     path('devices/<str:device_id>/update/', views.DeviceUpdateView.as_view(), name='device_update'),
     path('devices/<str:device_id>/delete/', views.DeviceDeleteView.as_view(), name='device_delete'),
     path('devices/<str:device_id>/regenerate_key/', views.regenerate_device_key, name='regenerate_device_key'),
+    
+    # 传感器相关URLs
+    path('devices/<str:device_id>/sensors/create/', views.SensorCreateView.as_view(), name='sensor_create'),
+    path('sensors/<int:pk>/', views.SensorDetailView.as_view(), name='sensor_detail'),
+    path('sensors/<int:pk>/update/', views.SensorUpdateView.as_view(), name='sensor_update'),
+    path('sensors/<int:pk>/delete/', views.SensorDeleteView.as_view(), name='sensor_delete'),
+    
+    # 执行器相关URLs
+    path('devices/<str:device_id>/actuators/create/', views.ActuatorCreateView.as_view(), name='actuator_create'),
+    path('actuators/<int:pk>/update/', views.ActuatorUpdateView.as_view(), name='actuator_update'),
+    path('actuators/<int:pk>/delete/', views.ActuatorDeleteView.as_view(), name='actuator_delete'),
+    path('api/actuators/<int:pk>/control/', views.control_actuator, name='control_actuator'),
+    
+    # API URLs
+    path('api/sensors/<int:sensor_id>/data/', api_views.SensorDataAPIView.as_view(), name='sensor_data_api'),
+    path('api/actuators/<int:actuator_id>/', api_views.ActuatorDetailAPIView.as_view(), name='actuator_detail_api'),
 ] 

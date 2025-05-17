@@ -118,7 +118,11 @@
     <div class="sub-section">
         <div class="section-header">
             <h2>传感器列表</h2>
-            <!-- 此阶段仅显示，不提供添加功能 -->
+            <div class="header-actions">
+                <a href="{% url 'iot_devices:sensor_create' device.device_id %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> 添加传感器
+                </a>
+            </div>
         </div>
         
         {% if sensors %}
@@ -130,6 +134,8 @@
                             <th>类型</th>
                             <th>单位</th>
                             <th>值键名</th>
+                            <th>最新数据</th>
+                            <th>操作</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -139,6 +145,34 @@
                             <td>{{ sensor.sensor_type }}</td>
                             <td>{{ sensor.unit|default:"-" }}</td>
                             <td>{{ sensor.value_key }}</td>
+                            <td>
+                                {% if sensor.data_points.exists %}
+                                    {% with latest_data=sensor.data_points.first %}
+                                        {% if latest_data.value_float != None %}
+                                            {{ latest_data.value_float }} {{ sensor.unit }}
+                                        {% elif latest_data.value_string != None %}
+                                            {{ latest_data.value_string }}
+                                        {% elif latest_data.value_boolean != None %}
+                                            {% if latest_data.value_boolean %}是{% else %}否{% endif %}
+                                        {% endif %}
+                                    {% endwith %}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a href="{% url 'iot_devices:sensor_detail' sensor.id %}" class="btn btn-sm btn-info">
+                                        <i class="fas fa-chart-line"></i> 查看数据
+                                    </a>
+                                    <a href="{% url 'iot_devices:sensor_update' sensor.id %}" class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i> 编辑
+                                    </a>
+                                    <a href="{% url 'iot_devices:sensor_delete' sensor.id %}" class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i> 删除
+                                    </a>
+                                </div>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -147,6 +181,9 @@
         {% else %}
             <div class="no-data">
                 <p>此设备还没有配置传感器。</p>
+                <a href="{% url 'iot_devices:sensor_create' device.device_id %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> 添加传感器
+                </a>
             </div>
         {% endif %}
     </div>
@@ -155,7 +192,11 @@
     <div class="sub-section">
         <div class="section-header">
             <h2>执行器列表</h2>
-            <!-- 此阶段仅显示，不提供添加功能 -->
+            <div class="header-actions">
+                <a href="{% url 'iot_devices:actuator_create' device.device_id %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> 添加执行器
+                </a>
+            </div>
         </div>
         
         {% if actuators %}
@@ -167,15 +208,51 @@
                             <th>类型</th>
                             <th>命令键名</th>
                             <th>当前状态</th>
+                            <th>控制</th>
+                            <th>操作</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for actuator in actuators %}
-                        <tr>
+                        <tr id="actuator-row-{{ actuator.id }}">
                             <td>{{ actuator.name }}</td>
                             <td>{{ actuator.actuator_type }}</td>
                             <td>{{ actuator.command_key }}</td>
-                            <td>{{ actuator.current_state|default:"-" }}</td>
+                            <td class="actuator-state">{{ actuator.current_state|default:"-" }}</td>
+                            <td>
+                                {% if actuator.actuator_type == 'switch' %}
+                                    <div class="switch-control">
+                                        <button class="btn btn-sm btn-success control-btn" data-actuator-id="{{ actuator.id }}" data-value="ON">
+                                            <i class="fas fa-power-off"></i> 开启
+                                        </button>
+                                        <button class="btn btn-sm btn-secondary control-btn" data-actuator-id="{{ actuator.id }}" data-value="OFF">
+                                            <i class="fas fa-power-off"></i> 关闭
+                                        </button>
+                                    </div>
+                                {% elif actuator.actuator_type == 'dimmer' %}
+                                    <div class="dimmer-control">
+                                        <input type="range" min="0" max="100" value="{{ actuator.current_state|default:'0' }}" class="slider" id="slider-{{ actuator.id }}" data-actuator-id="{{ actuator.id }}">
+                                        <span class="slider-value">{{ actuator.current_state|default:'0' }}%</span>
+                                    </div>
+                                {% else %}
+                                    <div class="custom-control">
+                                        <input type="text" class="form-control form-control-sm custom-value" id="value-{{ actuator.id }}" placeholder="输入值">
+                                        <button class="btn btn-sm btn-primary send-btn" data-actuator-id="{{ actuator.id }}">
+                                            <i class="fas fa-paper-plane"></i> 发送
+                                        </button>
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a href="{% url 'iot_devices:actuator_update' actuator.id %}" class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i> 编辑
+                                    </a>
+                                    <a href="{% url 'iot_devices:actuator_delete' actuator.id %}" class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i> 删除
+                                    </a>
+                                </div>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -184,6 +261,9 @@
         {% else %}
             <div class="no-data">
                 <p>此设备还没有配置执行器。</p>
+                <a href="{% url 'iot_devices:actuator_create' device.device_id %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> 添加执行器
+                </a>
             </div>
         {% endif %}
     </div>
@@ -194,7 +274,6 @@
         </a>
     </div>
 </div>
-
 {% endblock %}
 
 {% block extra_js %}
@@ -256,7 +335,7 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                showCommandResult('发送命令时出错，请稍后重试', false);
+                showCommandResult('发送命令失败，请稍后重试', false);
             });
         });
 
@@ -280,9 +359,82 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                showCommandResult('发送命令时出错，请稍后重试', false);
+                showCommandResult('发送命令失败，请稍后重试', false);
             });
         });
+
+        // 控制执行器
+        const controlButtons = document.querySelectorAll('.control-btn');
+        controlButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const actuatorId = this.getAttribute('data-actuator-id');
+                const value = this.getAttribute('data-value');
+                
+                controlActuator(actuatorId, value);
+            });
+        });
+
+        // 滑块控制
+        const sliders = document.querySelectorAll('.slider');
+        sliders.forEach(slider => {
+            const valueDisplay = slider.nextElementSibling;
+            
+            // 更新显示的值
+            slider.addEventListener('input', function() {
+                valueDisplay.textContent = this.value + '%';
+            });
+            
+            // 发送命令
+            slider.addEventListener('change', function() {
+                const actuatorId = this.getAttribute('data-actuator-id');
+                const value = this.value;
+                
+                controlActuator(actuatorId, value);
+            });
+        });
+
+        // 自定义值控制
+        const sendButtons = document.querySelectorAll('.send-btn');
+        sendButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const actuatorId = this.getAttribute('data-actuator-id');
+                const inputElement = document.getElementById(`value-${actuatorId}`);
+                const value = inputElement.value.trim();
+                
+                if (value) {
+                    controlActuator(actuatorId, value);
+                }
+            });
+        });
+
+        // 发送控制命令到执行器
+        function controlActuator(actuatorId, value) {
+            fetch(`/api/actuators/${actuatorId}/control/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ value: value })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 更新当前状态显示
+                    const row = document.getElementById(`actuator-row-${actuatorId}`);
+                    const stateCell = row.querySelector('.actuator-state');
+                    stateCell.textContent = data.new_state;
+                    
+                    showCommandResult(data.message, true);
+                } else {
+                    showCommandResult(data.message, false);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showCommandResult('发送命令失败，请稍后重试', false);
+            });
+        }
     });
 </script>
 {% endblock %} 

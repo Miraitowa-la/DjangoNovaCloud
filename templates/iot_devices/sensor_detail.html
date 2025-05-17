@@ -1,0 +1,297 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ sensor.name }} - NovaCloud{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="content-section">
+    <div class="section-header">
+        <h1>传感器详情</h1>
+        <div class="header-actions">
+            <a href="{% url 'iot_devices:sensor_update' sensor.id %}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> 编辑传感器
+            </a>
+            <a href="{% url 'iot_devices:sensor_delete' sensor.id %}" class="btn btn-danger">
+                <i class="fas fa-trash"></i> 删除传感器
+            </a>
+        </div>
+    </div>
+    
+    <div class="detail-card">
+        <div class="detail-header">
+            <h2>{{ sensor.name }}</h2>
+        </div>
+        
+        <div class="detail-body">
+            <div class="detail-row">
+                <div class="detail-label">传感器名称:</div>
+                <div class="detail-value">{{ sensor.name }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">传感器类型:</div>
+                <div class="detail-value">{{ sensor.sensor_type }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">单位:</div>
+                <div class="detail-value">{{ sensor.unit|default:"-" }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">值键名:</div>
+                <div class="detail-value">{{ sensor.value_key }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">所属设备:</div>
+                <div class="detail-value">
+                    <a href="{% url 'iot_devices:device_detail' device.device_id %}">
+                        {{ device.name }} ({{ device.device_id }})
+                    </a>
+                </div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">创建时间:</div>
+                <div class="detail-value">{{ sensor.created_at|date:"Y-m-d H:i" }}</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 数据可视化部分 -->
+    <div class="sub-section">
+        <div class="section-header">
+            <h2>数据可视化</h2>
+            <div class="header-actions">
+                <div class="data-controls">
+                    <div class="period-selector">
+                        <label for="period-select">时间范围:</label>
+                        <select id="period-select" class="form-control">
+                            <option value="1h">最近1小时</option>
+                            <option value="12h">最近12小时</option>
+                            <option value="24h" selected>最近24小时</option>
+                            <option value="7d">最近7天</option>
+                            <option value="30d">最近30天</option>
+                        </select>
+                    </div>
+                    <div class="density-selector">
+                        <label for="density-select">显示密度:</label>
+                        <select id="density-select" class="form-control">
+                            <option value="all">全部数据</option>
+                            <option value="100" selected>≤100个点</option>
+                            <option value="50">≤50个点</option>
+                            <option value="30">≤30个点</option>
+                            <option value="20">≤20个点</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <canvas id="sensorChart"></canvas>
+        </div>
+    </div>
+    
+    <!-- 最近数据记录部分 -->
+    <div class="sub-section">
+        <div class="section-header">
+            <h2>最近数据记录</h2>
+        </div>
+        
+        {% if recent_data %}
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>记录时间</th>
+                            <th>数值</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for data_point in recent_data %}
+                        <tr>
+                            <td>{{ data_point.timestamp|date:"Y-m-d H:i:s" }}</td>
+                            <td>
+                                {% if data_point.value_float != None %}
+                                    {{ data_point.value_float }} {{ sensor.unit }}
+                                {% elif data_point.value_string != None %}
+                                    {{ data_point.value_string }}
+                                {% elif data_point.value_boolean != None %}
+                                    {% if data_point.value_boolean %}是{% else %}否{% endif %}
+                                {% else %}
+                                    无数据
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="no-data">
+                <p>暂无数据记录。</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    <div class="back-link">
+        <a href="{% url 'iot_devices:device_detail' device.device_id %}" class="btn btn-light">
+            <i class="fas fa-arrow-left"></i> 返回设备详情
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 图表相关变量
+        const ctx = document.getElementById('sensorChart').getContext('2d');
+        let sensorChart = null;
+        const periodSelect = document.getElementById('period-select');
+        const densitySelect = document.getElementById('density-select');
+        let currentData = null; // 保存当前获取的完整数据
+        
+        // 获取CSRF Token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+        
+        // 加载传感器数据
+        function loadSensorData(period = '24h') {
+            fetch(`/api/sensors/{{ sensor.id }}/data/?period=${period}`, {
+                headers: {
+                    'X-CSRFToken': csrftoken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 保存完整数据集
+                currentData = data;
+                
+                // 根据当前密度设置应用数据
+                applyDensityFilter();
+            })
+            .catch(error => {
+                console.error('获取传感器数据出错:', error);
+            });
+        }
+        
+        // 应用密度过滤
+        function applyDensityFilter() {
+            if (!currentData) return;
+            
+            let labels = [];
+            let values = [];
+            
+            // 获取密度设置
+            const density = densitySelect.value;
+            
+            // 如果是全部数据或数据量少于密度设置，直接使用全部数据
+            if (density === 'all' || currentData.data.length <= parseInt(density) || isNaN(parseInt(density))) {
+                labels = currentData.data.map(item => {
+                    const date = new Date(item.timestamp);
+                    return date.toLocaleString();
+                });
+                
+                values = currentData.data.map(item => item.value);
+            } else {
+                // 根据密度进行抽样
+                const maxPoints = parseInt(density);
+                const step = Math.ceil(currentData.data.length / maxPoints);
+                
+                for (let i = 0; i < currentData.data.length; i += step) {
+                    const item = currentData.data[i];
+                    const date = new Date(item.timestamp);
+                    labels.push(date.toLocaleString());
+                    values.push(item.value);
+                }
+                
+                // 确保包含最后一个数据点
+                if (currentData.data.length > 0 && (currentData.data.length - 1) % step !== 0) {
+                    const lastItem = currentData.data[currentData.data.length - 1];
+                    const date = new Date(lastItem.timestamp);
+                    labels.push(date.toLocaleString());
+                    values.push(lastItem.value);
+                }
+            }
+            
+            // 创建或更新图表
+            updateChart(labels, values, currentData.sensor.unit);
+        }
+        
+        // 更新图表
+        function updateChart(labels, values, unit) {
+            // 如果图表已存在，先销毁
+            if (sensorChart) {
+                sensorChart.destroy();
+            }
+            
+            // 创建新图表
+            sensorChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `{{ sensor.name }} ${unit ? '(' + unit + ')' : ''}`,
+                        data: values,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 初始加载数据
+        loadSensorData();
+        
+        // 监听时间范围选择变化
+        periodSelect.addEventListener('change', function() {
+            loadSensorData(this.value);
+        });
+        
+        // 监听密度选择变化
+        densitySelect.addEventListener('change', function() {
+            applyDensityFilter();
+        });
+    });
+</script>
+{% endblock %} 

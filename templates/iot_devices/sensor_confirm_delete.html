@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}删除传感器 - NovaCloud{% endblock %}
+
+{% block content %}
+<div class="content-section">
+    <div class="section-header">
+        <h1>删除传感器</h1>
+    </div>
+    
+    <div class="confirm-delete">
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle"></i>
+            <p>您确定要删除传感器 <strong>{{ sensor.name }}</strong> 吗？这个操作将无法撤销!</p>
+            
+            <div class="confirm-details">
+                <div>传感器类型: {{ sensor.sensor_type }}</div>
+                <div>所属设备: {{ device.name }}</div>
+            </div>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-actions">
+                <div class="button-group">
+                    <button type="submit" class="btn btn-danger">确认删除</button>
+                    <a href="{% url 'iot_devices:device_detail' device.device_id %}" class="btn btn-light">取消</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

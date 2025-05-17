@@ -7,10 +7,14 @@ from django.contrib import messages
 from django.http import HttpResponseForbidden, JsonResponse
 from django.db.models import Q
 
-from .models import Project, Device, Sensor, Actuator
-from .forms import ProjectForm, DeviceForm
+from .models import Project, Device, Sensor, Actuator, SensorData
+from .forms import ProjectForm, DeviceForm, SensorForm, ActuatorForm
 
 import uuid
+import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 # 项目视图
@@ -239,3 +243,291 @@ def regenerate_device_key(request, device_id):
         return redirect('iot_devices:device_detail', device_id=device_id)
     
     return redirect('iot_devices:device_detail', device_id=device_id)
+
+
+# 传感器视图
+class SensorCreateView(LoginRequiredMixin, CreateView):
+    """传感器创建视图"""
+    model = Sensor
+    form_class = SensorForm
+    template_name = 'iot_devices/sensor_form.html'
+    
+    def get_form_kwargs(self):
+        """传递设备到表单"""
+        kwargs = super().get_form_kwargs()
+        device = get_object_or_404(Device, device_id=self.kwargs['device_id'])
+        
+        # 验证权限
+        if device.project.owner != self.request.user:
+            raise HttpResponseForbidden("您没有权限管理此设备的传感器")
+        
+        kwargs['device'] = device
+        return kwargs
+    
+    def get_context_data(self, **kwargs):
+        """添加设备到上下文"""
+        context = super().get_context_data(**kwargs)
+        device = get_object_or_404(Device, device_id=self.kwargs['device_id'])
+        context['device'] = device
+        return context
+    
+    def form_valid(self, form):
+        """保存成功后显示提示"""
+        messages.success(self.request, "传感器创建成功")
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        """成功后重定向到设备详情页"""
+        return reverse('iot_devices:device_detail', kwargs={'device_id': self.kwargs['device_id']})
+
+
+class SensorUpdateView(LoginRequiredMixin, UpdateView):
+    """传感器更新视图"""
+    model = Sensor
+    form_class = SensorForm
+    template_name = 'iot_devices/sensor_form.html'
+    
+    def get_object(self):
+        """获取传感器，确保用户有权限"""
+        sensor = get_object_or_404(Sensor, id=self.kwargs['pk'])
+        if sensor.device.project.owner != self.request.user:
+            raise HttpResponseForbidden("您没有权限编辑此传感器")
+        return sensor
+    
+    def get_context_data(self, **kwargs):
+        """添加设备到上下文"""
+        context = super().get_context_data(**kwargs)
+        context['device'] = self.object.device
+        return context
+    
+    def form_valid(self, form):
+        """保存成功后显示提示"""
+        messages.success(self.request, "传感器更新成功")
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        """成功后重定向到设备详情页"""
+        return reverse('iot_devices:device_detail', kwargs={'device_id': self.object.device.device_id})
+
+
+class SensorDeleteView(LoginRequiredMixin, DeleteView):
+    """传感器删除视图"""
+    model = Sensor
+    template_name = 'iot_devices/sensor_confirm_delete.html'
+    
+    def get_object(self):
+        """获取传感器，确保用户有权限"""
+        sensor = get_object_or_404(Sensor, id=self.kwargs['pk'])
+        if sensor.device.project.owner != self.request.user:
+            raise HttpResponseForbidden("您没有权限删除此传感器")
+        return sensor
+    
+    def get_context_data(self, **kwargs):
+        """添加设备到上下文"""
+        context = super().get_context_data(**kwargs)
+        context['device'] = self.object.device
+        return context
+    
+    def delete(self, request, *args, **kwargs):
+        """删除成功后显示提示"""
+        sensor = self.get_object()
+        device_id = sensor.device.device_id
+        messages.success(self.request, "传感器已删除")
+        return super().delete(request, *args, **kwargs)
+    
+    def get_success_url(self):
+        """成功后重定向到设备详情页"""
+        return reverse('iot_devices:device_detail', kwargs={'device_id': self.object.device.device_id})
+
+
+class SensorDetailView(LoginRequiredMixin, DetailView):
+    """传感器详情视图（含数据可视化）"""
+    model = Sensor
+    template_name = 'iot_devices/sensor_detail.html'
+    context_object_name = 'sensor'
+    
+    def get_object(self):
+        """获取传感器，确保用户有权限"""
+        sensor = get_object_or_404(Sensor, id=self.kwargs['pk'])
+        if sensor.device.project.owner != self.request.user:
+            raise HttpResponseForbidden("您没有权限查看此传感器")
+        return sensor
+    
+    def get_context_data(self, **kwargs):
+        """添加额外数据到上下文"""
+        context = super().get_context_data(**kwargs)
+        context['device'] = self.object.device
+        
+        # 添加最近的传感器数据（最多10条）
+        context['recent_data'] = SensorData.objects.filter(sensor=self.object).order_by('-timestamp')[:10]
+        
+        return context
+
+
+# 执行器视图
+class ActuatorCreateView(LoginRequiredMixin, CreateView):
+    """执行器创建视图"""
+    model = Actuator
+    form_class = ActuatorForm
+    template_name = 'iot_devices/actuator_form.html'
+    
+    def get_form_kwargs(self):
+        """传递设备到表单"""
+        kwargs = super().get_form_kwargs()
+        device = get_object_or_404(Device, device_id=self.kwargs['device_id'])
+        
+        # 验证权限
+        if device.project.owner != self.request.user:
+            raise HttpResponseForbidden("您没有权限管理此设备的执行器")
+        
+        kwargs['device'] = device
+        return kwargs
+    
+    def get_context_data(self, **kwargs):
+        """添加设备到上下文"""
+        context = super().get_context_data(**kwargs)
+        device = get_object_or_404(Device, device_id=self.kwargs['device_id'])
+        context['device'] = device
+        return context
+    
+    def form_valid(self, form):
+        """保存成功后显示提示"""
+        messages.success(self.request, "执行器创建成功")
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        """成功后重定向到设备详情页"""
+        return reverse('iot_devices:device_detail', kwargs={'device_id': self.kwargs['device_id']})
+
+
+class ActuatorUpdateView(LoginRequiredMixin, UpdateView):
+    """执行器更新视图"""
+    model = Actuator
+    form_class = ActuatorForm
+    template_name = 'iot_devices/actuator_form.html'
+    
+    def get_object(self):
+        """获取执行器，确保用户有权限"""
+        actuator = get_object_or_404(Actuator, id=self.kwargs['pk'])
+        if actuator.device.project.owner != self.request.user:
+            raise HttpResponseForbidden("您没有权限编辑此执行器")
+        return actuator
+    
+    def get_context_data(self, **kwargs):
+        """添加设备到上下文"""
+        context = super().get_context_data(**kwargs)
+        context['device'] = self.object.device
+        return context
+    
+    def form_valid(self, form):
+        """保存成功后显示提示"""
+        messages.success(self.request, "执行器更新成功")
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        """成功后重定向到设备详情页"""
+        return reverse('iot_devices:device_detail', kwargs={'device_id': self.object.device.device_id})
+
+
+class ActuatorDeleteView(LoginRequiredMixin, DeleteView):
+    """执行器删除视图"""
+    model = Actuator
+    template_name = 'iot_devices/actuator_confirm_delete.html'
+    
+    def get_object(self):
+        """获取执行器，确保用户有权限"""
+        actuator = get_object_or_404(Actuator, id=self.kwargs['pk'])
+        if actuator.device.project.owner != self.request.user:
+            raise HttpResponseForbidden("您没有权限删除此执行器")
+        return actuator
+    
+    def get_context_data(self, **kwargs):
+        """添加设备到上下文"""
+        context = super().get_context_data(**kwargs)
+        context['device'] = self.object.device
+        return context
+    
+    def delete(self, request, *args, **kwargs):
+        """删除成功后显示提示"""
+        actuator = self.get_object()
+        device_id = actuator.device.device_id
+        messages.success(self.request, "执行器已删除")
+        return super().delete(request, *args, **kwargs)
+    
+    def get_success_url(self):
+        """成功后重定向到设备详情页"""
+        return reverse('iot_devices:device_detail', kwargs={'device_id': self.object.device.device_id})
+
+
+@login_required
+def control_actuator(request, pk):
+    """控制执行器"""
+    if request.method == 'POST':
+        actuator = get_object_or_404(Actuator, id=pk)
+        
+        # 验证用户权限
+        if actuator.device.project.owner != request.user:
+            return JsonResponse({
+                'success': False,
+                'message': '您没有权限控制此执行器'
+            }, status=403)
+        
+        try:
+            # 解析命令数据
+            command_data = json.loads(request.body)
+            
+            # 检查命令值字段
+            if 'value' not in command_data:
+                return JsonResponse({
+                    'success': False,
+                    'message': '缺少value字段'
+                }, status=400)
+            
+            value = command_data['value']
+            
+            # 构建控制命令
+            command = {
+                'target': actuator.command_key,
+                'action': value
+            }
+            
+            # 导入MQTT客户端
+            from mqtt_client.mqtt import MQTTClient
+            mqtt_client = MQTTClient.get_instance()
+            
+            # 发送命令
+            command_sent = mqtt_client.publish_command(actuator.device.device_id, command)
+            
+            if command_sent:
+                # 更新执行器状态
+                actuator.current_state = str(value)
+                actuator.save()
+                
+                return JsonResponse({
+                    'success': True,
+                    'message': '命令已发送',
+                    'actuator_id': actuator.id,
+                    'new_state': actuator.current_state
+                })
+            else:
+                return JsonResponse({
+                    'success': False,
+                    'message': '命令发送失败，请稍后重试'
+                }, status=500)
+        
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'success': False,
+                'message': '无效的JSON格式'
+            }, status=400)
+        except Exception as e:
+            logger.error(f"控制执行器时出错: {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'message': f'控制执行器时出错: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': '不支持的请求方法'
+    }, status=405)

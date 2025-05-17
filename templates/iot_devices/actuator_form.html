@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if form.instance.id %}编辑执行器{% else %}添加执行器{% endif %} - NovaCloud{% endblock %}
+
+{% block content %}
+<div class="content-section">
+    <div class="section-header">
+        <h1>{% if form.instance.id %}编辑执行器{% else %}添加执行器{% endif %}</h1>
+    </div>
+    
+    <div class="form-container">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.name.id_for_label }}">执行器名称</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                <div class="field-error">{{ form.name.errors }}</div>
+                {% endif %}
+                {% if form.name.help_text %}
+                <div class="field-help">{{ form.name.help_text }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.actuator_type.id_for_label }}">执行器类型</label>
+                {{ form.actuator_type }}
+                {% if form.actuator_type.errors %}
+                <div class="field-error">{{ form.actuator_type.errors }}</div>
+                {% endif %}
+                {% if form.actuator_type.help_text %}
+                <div class="field-help">{{ form.actuator_type.help_text }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.command_key.id_for_label }}">命令键名</label>
+                {{ form.command_key }}
+                {% if form.command_key.errors %}
+                <div class="field-error">{{ form.command_key.errors }}</div>
+                {% endif %}
+                {% if form.command_key.help_text %}
+                <div class="field-help">{{ form.command_key.help_text }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.current_state.id_for_label }}">当前状态</label>
+                {{ form.current_state }}
+                {% if form.current_state.errors %}
+                <div class="field-error">{{ form.current_state.errors }}</div>
+                {% endif %}
+                {% if form.current_state.help_text %}
+                <div class="field-help">{{ form.current_state.help_text }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-actions">
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">保存</button>
+                    <a href="{% url 'iot_devices:device_detail' device.device_id %}" class="btn btn-light">取消</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

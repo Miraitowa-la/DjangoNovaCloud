@@ -1,5 +1,5 @@
 from django import forms
-from .models import Project, Device
+from .models import Project, Device, Sensor, Actuator
 
 
 class ProjectForm(forms.ModelForm):
@@ -71,4 +71,60 @@ class DeviceForm(forms.ModelForm):
             except Project.DoesNotExist:
                 self.add_error('project', '无效的项目')
         
-        return cleaned_data 
+        return cleaned_data
+
+
+class SensorForm(forms.ModelForm):
+    """传感器表单"""
+    class Meta:
+        model = Sensor
+        fields = ['name', 'sensor_type', 'unit', 'value_key']
+        help_texts = {
+            'sensor_type': '传感器类型，例如：temperature, humidity',
+            'unit': '单位，例如：°C, %',
+            'value_key': '设备数据中的键名，用于识别此传感器的值'
+        }
+    
+    def __init__(self, *args, **kwargs):
+        self.device = kwargs.pop('device', None)
+        super().__init__(*args, **kwargs)
+        
+        # 对字段添加样式类
+        for field_name, field in self.fields.items():
+            field.widget.attrs['class'] = 'form-control'
+    
+    def save(self, commit=True):
+        sensor = super().save(commit=False)
+        if self.device:
+            sensor.device = self.device
+        if commit:
+            sensor.save()
+        return sensor
+
+
+class ActuatorForm(forms.ModelForm):
+    """执行器表单"""
+    class Meta:
+        model = Actuator
+        fields = ['name', 'actuator_type', 'command_key', 'current_state']
+        help_texts = {
+            'actuator_type': '执行器类型，例如：switch, dimmer',
+            'command_key': '控制命令的键名，用于发送控制命令',
+            'current_state': '当前状态，例如：ON, OFF, 50%'
+        }
+    
+    def __init__(self, *args, **kwargs):
+        self.device = kwargs.pop('device', None)
+        super().__init__(*args, **kwargs)
+        
+        # 对字段添加样式类
+        for field_name, field in self.fields.items():
+            field.widget.attrs['class'] = 'form-control'
+    
+    def save(self, commit=True):
+        actuator = super().save(commit=False)
+        if self.device:
+            actuator.device = self.device
+        if commit:
+            actuator.save()
+        return actuator 

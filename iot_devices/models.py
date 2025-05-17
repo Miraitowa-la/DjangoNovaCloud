@@ -88,3 +88,31 @@ class Actuator(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.device.name})"
+
+
+class SensorData(models.Model):
+    """传感器数据模型"""
+    sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE, related_name='data_points', verbose_name='传感器')
+    timestamp = models.DateTimeField('记录时间', auto_now_add=True)
+    value_float = models.FloatField('浮点数值', null=True, blank=True)
+    value_string = models.CharField('字符串值', max_length=100, null=True, blank=True)
+    value_boolean = models.BooleanField('布尔值', null=True, blank=True)
+
+    class Meta:
+        verbose_name = '传感器数据'
+        verbose_name_plural = '传感器数据'
+        ordering = ['-timestamp']
+        indexes = [
+            models.Index(fields=['sensor', '-timestamp'])
+        ]
+
+    def __str__(self):
+        if self.value_float is not None:
+            value = self.value_float
+        elif self.value_string is not None:
+            value = self.value_string
+        elif self.value_boolean is not None:
+            value = "是" if self.value_boolean else "否"
+        else:
+            value = "无数据"
+        return f"{self.sensor.name}: {value} ({self.timestamp.strftime('%Y-%m-%d %H:%M:%S')})"

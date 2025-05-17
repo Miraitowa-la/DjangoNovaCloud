@@ -10,7 +10,7 @@ from django.db import transaction
 logger = logging.getLogger(__name__)
 
 # 导入设备模型
-from iot_devices.models import Device, Sensor
+from iot_devices.models import Device, Sensor, SensorData
 
 
 class MQTTClient:
@@ -177,10 +177,21 @@ class MQTTClient:
                     for sensor in Sensor.objects.filter(device=device):
                         if sensor.value_key in data:
                             sensor_value = data[sensor.value_key]
-                            # 在这里，我们只是记录数据，后续阶段会实现数据存储
                             logger.info(f"传感器 {sensor.name} 数据: {sensor_value} {sensor.unit}")
                             
-                            # TODO: 在下一阶段实现传感器数据的存储
+                            # 根据数据类型保存到对应字段
+                            sensor_data = SensorData(sensor=sensor)
+                            
+                            if isinstance(sensor_value, (int, float)):
+                                sensor_data.value_float = float(sensor_value)
+                            elif isinstance(sensor_value, bool):
+                                sensor_data.value_boolean = sensor_value
+                            else:
+                                sensor_data.value_string = str(sensor_value)
+                            
+                            # 保存数据
+                            sensor_data.save()
+                            logger.debug(f"保存传感器数据: {sensor_data}")
                 
                 except Device.DoesNotExist:
                     logger.warning(f"未知设备ID: {device_id}")
