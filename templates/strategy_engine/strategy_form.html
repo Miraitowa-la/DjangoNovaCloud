@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if action == '创建' %}创建策略{% else %}编辑策略{% endif %} - NovaCloud{% endblock %}
+
+{% block content %}
+<div class="content-section">
+    <div class="section-header">
+        <h1>{% if action == '创建' %}创建策略{% else %}编辑策略{% endif %}</h1>
+    </div>
+    
+    {% if action == '创建' %}
+    <div class="project-info">
+        <h2>{{ project.name }}</h2>
+        <span class="badge badge-primary">{{ project.project_id }}</span>
+    </div>
+    {% endif %}
+    
+    <div class="form-container">
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.name.id_for_label }}">策略名称</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                <div class="field-error">{{ form.name.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.description.id_for_label }}">策略描述</label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                <div class="field-error">{{ form.description.errors }}</div>
+                {% endif %}
+                <small class="form-text text-muted">可选，描述策略的用途或工作方式。</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.trigger_source_device.id_for_label }}">触发设备</label>
+                {{ form.trigger_source_device }}
+                {% if form.trigger_source_device.errors %}
+                <div class="field-error">{{ form.trigger_source_device.errors }}</div>
+                {% endif %}
+                <small class="form-text text-muted">选择一个设备作为触发源，该设备的传感器数据将用于评估条件。</small>
+            </div>
+            
+            <div class="form-check form-group">
+                {{ form.is_enabled }}
+                <label class="form-check-label" for="{{ form.is_enabled.id_for_label }}">启用策略</label>
+                {% if form.is_enabled.errors %}
+                <div class="field-error">{{ form.is_enabled.errors }}</div>
+                {% endif %}
+                <small class="form-text text-muted">禁用策略后，即使条件满足也不会执行动作。</small>
+            </div>
+            
+            <div class="form-actions">
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> 保存
+                    </button>
+                    {% if action == '创建' %}
+                    <a href="{% url 'strategy_engine:strategy_list' project.project_id %}" class="btn btn-light">
+                        <i class="fas fa-times"></i> 取消
+                    </a>
+                    {% else %}
+                    <a href="{% url 'strategy_engine:strategy_detail' object.pk %}" class="btn btn-light">
+                        <i class="fas fa-times"></i> 取消
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+
+{% block title %}数据记录 - {{ sensor.name }} - NovaCloud{% endblock %}
+
+{% block content %}
+<div class="content-section">
+    <div class="section-header">
+        <h1>传感器数据记录</h1>
+    </div>
+    
+    <div class="sensor-info">
+        <h2>传感器：{{ sensor.name }}</h2>
+        <div class="sensor-meta">
+            <span class="device-info">设备：{{ device.name }}</span>
+            <span class="type-info">类型：{{ sensor.sensor_type }}</span>
+            {% if sensor.unit %}
+            <span class="unit-info">单位：{{ sensor.unit }}</span>
+            {% endif %}
+        </div>
+    </div>
+    
+    {% if data_records %}
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>记录时间</th>
+                        <th>数值</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in data_records %}
+                    <tr>
+                        <td>{{ record.timestamp|date:"Y-m-d H:i:s" }}</td>
+                        <td>
+                            {% if record.value_float != None %}
+                                {{ record.value_float }} {{ sensor.unit }}
+                            {% elif record.value_string != None %}
+                                {{ record.value_string }}
+                            {% elif record.value_boolean != None %}
+                                {% if record.value_boolean %}是{% else %}否{% endif %}
+                            {% else %}
+                                无数据
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- 分页 -->
+        {% if is_paginated %}
+        <div class="pagination-container">
+            <div class="pagination-info">
+                显示 {{ page_obj.start_index }} - {{ page_obj.end_index }} 条，共 {{ paginator.count }} 条记录
+            </div>
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1" class="pagination-button pagination-end" title="首页">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                    <a href="?page={{ page_obj.previous_page_number }}" class="pagination-button" title="上一页">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                {% else %}
+                    <span class="pagination-button pagination-end disabled">
+                        <i class="fas fa-angle-double-left"></i>
+                    </span>
+                    <span class="pagination-button disabled">
+                        <i class="fas fa-angle-left"></i>
+                    </span>
+                {% endif %}
+                
+                <div class="pagination-numbers">
+                    {% for num in paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <span class="pagination-button current">{{ num }}</span>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <a href="?page={{ num }}" class="pagination-button">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}" class="pagination-button" title="下一页">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                    <a href="?page={{ paginator.num_pages }}" class="pagination-button pagination-end" title="末页">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                {% else %}
+                    <span class="pagination-button disabled">
+                        <i class="fas fa-angle-right"></i>
+                    </span>
+                    <span class="pagination-button pagination-end disabled">
+                        <i class="fas fa-angle-double-right"></i>
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    {% else %}
+        <div class="no-data">
+            <div class="no-data-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <h3>暂无数据记录</h3>
+            <p>此传感器尚未上报任何数据。</p>
+        </div>
+    {% endif %}
+    
+    <div class="back-link">
+        <a href="{% url 'iot_devices:sensor_detail' sensor.id %}" class="btn btn-light">
+            <i class="fas fa-arrow-left"></i> 返回传感器详情
+        </a>
+    </div>
+</div>
+
+<style>
+    .sensor-info {
+        margin-bottom: 20px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .sensor-info h2 {
+        margin-top: 0;
+        margin-bottom: 10px;
+        font-size: 1.5rem;
+        color: #333;
+    }
+    
+    .sensor-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    
+    .sensor-meta span {
+        padding: 5px 10px;
+        background-color: #e9ecef;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        color: #666;
+    }
+    
+    .pagination-container {
+        margin-top: 20px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .pagination-info {
+        text-align: center;
+        color: #6c757d;
+        margin-bottom: 10px;
+        font-size: 0.9rem;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+        margin: 0;
+    }
+    
+    .pagination-numbers {
+        display: flex;
+        gap: 5px;
+    }
+    
+    .pagination-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 34px;
+        height: 34px;
+        background-color: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        color: #007bff;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+    }
+    
+    .pagination-button:hover {
+        background-color: #e9ecef;
+        color: #0056b3;
+        text-decoration: none;
+    }
+    
+    .pagination-button.current {
+        background-color: #007bff;
+        border-color: #007bff;
+        color: #fff;
+        font-weight: bold;
+    }
+    
+    .pagination-button.disabled {
+        color: #6c757d;
+        pointer-events: none;
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+        opacity: 0.6;
+    }
+    
+    .pagination-end {
+        color: #495057;
+    }
+</style>
+{% endblock %} 

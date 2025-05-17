@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'iot_devices',
     'mqtt_client',
     'tcp_server',
+    'strategy_engine',
 ]
 
 MIDDLEWARE = [

@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if action == '添加' %}添加条件{% else %}编辑条件{% endif %} - NovaCloud{% endblock %}
+
+{% block content %}
+<div class="content-section">
+    <div class="section-header">
+        <h1>{% if action == '添加' %}添加条件{% else %}编辑条件{% endif %}</h1>
+    </div>
+    
+    <div class="strategy-info">
+        <h2>策略：{{ strategy.name }}</h2>
+        <div class="strategy-meta">
+            <span class="badge {% if strategy.is_enabled %}badge-success{% else %}badge-secondary{% endif %}">
+                {% if strategy.is_enabled %}已启用{% else %}已禁用{% endif %}
+            </span>
+            <span class="device-info">触发设备：{{ strategy.trigger_source_device.name }}</span>
+        </div>
+    </div>
+    
+    <div class="form-container">
+        <form method="post" novalidate id="conditionForm">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.sensor.id_for_label }}">传感器</label>
+                {{ form.sensor }}
+                {% if form.sensor.errors %}
+                <div class="field-error">{{ form.sensor.errors }}</div>
+                {% endif %}
+                <small class="form-text text-muted">选择要监控的传感器。</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.metric_key.id_for_label }}">指标键名</label>
+                {{ form.metric_key }}
+                {% if form.metric_key.errors %}
+                <div class="field-error">{{ form.metric_key.errors }}</div>
+                {% endif %}
+                <small class="form-text text-muted">通常为"value"，表示使用传感器的当前值。</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.operator.id_for_label }}">比较运算符</label>
+                {{ form.operator }}
+                {% if form.operator.errors %}
+                <div class="field-error">{{ form.operator.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.threshold_value_type.id_for_label }}">阈值类型</label>
+                {{ form.threshold_value_type }}
+                {% if form.threshold_value_type.errors %}
+                <div class="field-error">{{ form.threshold_value_type.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <!-- 根据阈值类型切换显示不同的输入字段 -->
+            <div class="form-group" id="threshold-float">
+                <label for="{{ form.threshold_value_float.id_for_label }}">数值阈值</label>
+                {{ form.threshold_value_float }}
+                {% if form.threshold_value_float.errors %}
+                <div class="field-error">{{ form.threshold_value_float.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group" id="threshold-string">
+                <label for="{{ form.threshold_value_string.id_for_label }}">文本阈值</label>
+                {{ form.threshold_value_string }}
+                {% if form.threshold_value_string.errors %}
+                <div class="field-error">{{ form.threshold_value_string.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group" id="threshold-boolean">
+                <label for="{{ form.threshold_value_boolean.id_for_label }}">布尔阈值</label>
+                {{ form.threshold_value_boolean }}
+                {% if form.threshold_value_boolean.errors %}
+                <div class="field-error">{{ form.threshold_value_boolean.errors }}</div>
+                {% endif %}
+            </div>
+            
+            {% if next_condition or action == '编辑' %}
+            <div class="form-group">
+                <label for="{{ form.logical_operator_to_next.id_for_label }}">与下一条件的逻辑关系</label>
+                {{ form.logical_operator_to_next }}
+                {% if form.logical_operator_to_next.errors %}
+                <div class="field-error">{{ form.logical_operator_to_next.errors }}</div>
+                {% endif %}
+                <small class="form-text text-muted">如果没有下一个条件或为最后一个条件，可留空。</small>
+            </div>
+            {% endif %}
+            
+            <div class="form-actions">
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> 保存
+                    </button>
+                    <a href="{% url 'strategy_engine:strategy_detail' strategy.pk %}" class="btn btn-light">
+                        <i class="fas fa-times"></i> 取消
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 获取元素
+        const valueTypeSelector = document.getElementById('{{ form.threshold_value_type.id_for_label }}');
+        const floatField = document.getElementById('threshold-float');
+        const stringField = document.getElementById('threshold-string');
+        const booleanField = document.getElementById('threshold-boolean');
+        
+        // 初始化显示/隐藏
+        updateThresholdFields();
+        
+        // 添加事件监听器
+        valueTypeSelector.addEventListener('change', updateThresholdFields);
+        
+        function updateThresholdFields() {
+            const selectedType = valueTypeSelector.value;
+            
+            // 隐藏所有字段
+            floatField.style.display = 'none';
+            stringField.style.display = 'none';
+            booleanField.style.display = 'none';
+            
+            // 显示选中类型的字段
+            if (selectedType === 'float') {
+                floatField.style.display = 'block';
+            } else if (selectedType === 'string') {
+                stringField.style.display = 'block';
+            } else if (selectedType === 'boolean') {
+                booleanField.style.display = 'block';
+            }
+        }
+    });
+</script>
+{% endblock %} 

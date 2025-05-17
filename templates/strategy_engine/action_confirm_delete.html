@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block title %}删除动作 - NovaCloud{% endblock %}
+
+{% block content %}
+<div class="content-section">
+    <div class="section-header">
+        <h1>删除动作</h1>
+    </div>
+    
+    <div class="alert alert-danger">
+        <i class="fas fa-exclamation-triangle"></i> 警告！此操作不可逆。
+    </div>
+    
+    <div class="strategy-info">
+        <h2>策略：{{ strategy.name }}</h2>
+        <div class="strategy-meta">
+            <span class="badge {% if strategy.is_enabled %}badge-success{% else %}badge-secondary{% endif %}">
+                {% if strategy.is_enabled %}已启用{% else %}已禁用{% endif %}
+            </span>
+        </div>
+    </div>
+    
+    <div class="form-container">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="confirm-message">
+                <p>您确定要删除以下动作吗？</p>
+            </div>
+            
+            <div class="action-card">
+                <div class="action-header">
+                    <h3>
+                        {% if object.action_type == 'send_email_notification' %}
+                            <i class="fas fa-envelope"></i>
+                        {% elif object.action_type == 'control_actuator' %}
+                            <i class="fas fa-cogs"></i>
+                        {% elif object.action_type == 'webhook' %}
+                            <i class="fas fa-link"></i>
+                        {% endif %}
+                        {{ object.get_action_type_display }}
+                    </h3>
+                </div>
+                
+                <div class="action-body">
+                    {% if object.action_type == 'send_email_notification' %}
+                        <div class="action-detail-row">
+                            <span class="action-detail-label">接收者:</span>
+                            <span class="action-detail-value">
+                                {% if object.recipient_user %}
+                                    {{ object.recipient_user.username }}
+                                {% elif object.recipient_email %}
+                                    {{ object.recipient_email }}
+                                {% else %}
+                                    项目所有者
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="action-detail-row">
+                            <span class="action-detail-label">主题:</span>
+                            <span class="action-detail-value">{{ object.notification_subject_template }}</span>
+                        </div>
+                    {% elif object.action_type == 'control_actuator' %}
+                        <div class="action-detail-row">
+                            <span class="action-detail-label">执行器:</span>
+                            <span class="action-detail-value">
+                                {% if object.target_actuator %}
+                                    {{ object.target_actuator.name }} ({{ object.target_actuator.device.name }})
+                                {% else %}
+                                    未指定
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="action-detail-row">
+                            <span class="action-detail-label">命令:</span>
+                            <span class="action-detail-value">{{ object.actuator_command }}</span>
+                        </div>
+                    {% elif object.action_type == 'webhook' %}
+                        <div class="action-detail-row">
+                            <span class="action-detail-label">URL:</span>
+                            <span class="action-detail-value">{{ object.webhook_url }}</span>
+                        </div>
+                        <div class="action-detail-row">
+                            <span class="action-detail-label">方法:</span>
+                            <span class="action-detail-value">{{ object.webhook_method }}</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="alert alert-warning mt-3">
+                <p><i class="fas fa-info-circle"></i> 注意：删除此动作后，策略触发时将不再执行此动作。</p>
+                {% if strategy.actions.count == 1 %}
+                <p><i class="fas fa-exclamation-circle"></i> 这是该策略的唯一动作，删除后策略将不会执行任何操作。</p>
+                {% endif %}
+            </div>
+            
+            <div class="form-actions">
+                <div class="button-group">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> 确认删除
+                    </button>
+                    <a href="{% url 'strategy_engine:strategy_detail' strategy.pk %}" class="btn btn-light">
+                        <i class="fas fa-times"></i> 取消
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}删除条件 - NovaCloud{% endblock %}
+
+{% block content %}
+<div class="content-section">
+    <div class="section-header">
+        <h1>删除条件</h1>
+    </div>
+    
+    <div class="alert alert-danger">
+        <i class="fas fa-exclamation-triangle"></i> 警告！此操作不可逆。
+    </div>
+    
+    <div class="strategy-info">
+        <h2>策略：{{ strategy.name }}</h2>
+        <div class="strategy-meta">
+            <span class="badge {% if strategy.is_enabled %}badge-success{% else %}badge-secondary{% endif %}">
+                {% if strategy.is_enabled %}已启用{% else %}已禁用{% endif %}
+            </span>
+        </div>
+    </div>
+    
+    <div class="form-container">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="confirm-message">
+                <p>您确定要删除以下条件吗？</p>
+            </div>
+            
+            <div class="condition-card">
+                <div class="condition-header">
+                    <strong>{{ object.sensor.name }}</strong> {{ object.get_operator_display }}
+                    {% if object.threshold_value_type == 'float' %}
+                        {{ object.threshold_value_float }} {% if object.sensor.unit %}{{ object.sensor.unit }}{% endif %}
+                    {% elif object.threshold_value_type == 'string' %}
+                        "{{ object.threshold_value_string }}"
+                    {% elif object.threshold_value_type == 'boolean' %}
+                        {{ object.threshold_value_boolean|yesno:"是,否" }}
+                    {% endif %}
+                </div>
+                
+                {% if object.logical_operator_to_next %}
+                <div class="condition-footer">
+                    与下一个条件关系: <span class="badge badge-info">{{ object.get_logical_operator_to_next_display }}</span>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="alert alert-warning mt-3">
+                <p><i class="fas fa-info-circle"></i> 注意：删除此条件可能会改变策略的触发逻辑。</p>
+                {% if object.logical_operator_to_next %}
+                <p><i class="fas fa-link"></i> 此条件与下一个条件存在逻辑关系，删除后可能需要调整其他条件的逻辑关系。</p>
+                {% endif %}
+            </div>
+            
+            <div class="form-actions">
+                <div class="button-group">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> 确认删除
+                    </button>
+                    <a href="{% url 'strategy_engine:strategy_detail' strategy.pk %}" class="btn btn-light">
+                        <i class="fas fa-times"></i> 取消
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

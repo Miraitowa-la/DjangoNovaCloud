@@ -122,3 +122,59 @@ class SensorData(models.Model):
         else:
             value = "无数据"
         return f"{self.sensor.name}: {value} ({self.timestamp.strftime('%Y-%m-%d %H:%M:%S')})"
+
+
+class ActuatorData(models.Model):
+    """执行器数据模型 - 记录执行器上报的数据"""
+    actuator = models.ForeignKey(Actuator, on_delete=models.CASCADE, related_name='data_points', verbose_name='执行器')
+    timestamp = models.DateTimeField('记录时间', auto_now_add=True)
+    value = models.CharField('状态值', max_length=100, help_text="执行器上报的状态值")
+    source = models.CharField('数据来源', max_length=50, default='device', help_text="数据来源，例如：device, system")
+
+    class Meta:
+        verbose_name = '执行器数据'
+        verbose_name_plural = '执行器数据'
+        ordering = ['-timestamp']
+        indexes = [
+            models.Index(fields=['actuator', '-timestamp'])
+        ]
+
+    def __str__(self):
+        return f"{self.actuator.name}: {self.value} ({self.timestamp.strftime('%Y-%m-%d %H:%M:%S')})"
+
+
+class ActuatorCommand(models.Model):
+    """执行器命令模型 - 记录发送给执行器的命令"""
+    STATUS_CHOICES = (
+        ('pending', '待响应'),
+        ('success', '成功'),
+        ('failed', '失败'),
+        ('timeout', '超时'),
+    )
+    
+    SOURCE_CHOICES = (
+        ('user', '用户操作'),
+        ('strategy', '策略触发'),
+        ('system', '系统操作'),
+    )
+    
+    actuator = models.ForeignKey(Actuator, on_delete=models.CASCADE, related_name='commands', verbose_name='执行器')
+    timestamp = models.DateTimeField('发送时间', auto_now_add=True)
+    command_value = models.CharField('命令值', max_length=100, help_text="发送的命令值")
+    status = models.CharField('命令状态', max_length=20, choices=STATUS_CHOICES, default='pending')
+    source = models.CharField('命令来源', max_length=20, choices=SOURCE_CHOICES, default='user')
+    source_detail = models.CharField('来源详情', max_length=100, blank=True, null=True, help_text="例如：策略名称、用户名等")
+    response_time = models.DateTimeField('响应时间', blank=True, null=True)
+    response_message = models.TextField('响应消息', blank=True, null=True)
+
+    class Meta:
+        verbose_name = '执行器命令'
+        verbose_name_plural = '执行器命令'
+        ordering = ['-timestamp']
+        indexes = [
+            models.Index(fields=['actuator', '-timestamp'])
+        ]
+
+    def __str__(self):
+        status_text = dict(self.STATUS_CHOICES).get(self.status, '')
+        return f"{self.actuator.name}: {self.command_value} [{status_text}] ({self.timestamp.strftime('%Y-%m-%d %H:%M:%S')})"

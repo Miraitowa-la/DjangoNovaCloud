@@ -17,8 +17,14 @@
         <form method="post">
             {% csrf_token %}
             <div class="form-actions">
-                <button type="submit" class="btn btn-danger">确认删除</button>
-                <a href="{% url 'iot_devices:device_detail' object.device_id %}" class="btn btn-light">取消</a>
+                <div class="button-group">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> 确认删除
+                    </button>
+                    <a href="{% url 'iot_devices:device_detail' object.device_id %}" class="btn btn-light">
+                        <i class="fas fa-times"></i> 取消
+                    </a>
+                </div>
             </div>
         </form>
     </div>

@@ -245,6 +245,9 @@
                             </td>
                             <td>
                                 <div class="action-buttons">
+                                    <a href="{% url 'iot_devices:actuator_detail' actuator.id %}" class="btn btn-sm btn-info">
+                                        <i class="fas fa-chart-line"></i> 查看数据
+                                    </a>
                                     <a href="{% url 'iot_devices:actuator_update' actuator.id %}" class="btn btn-sm btn-warning">
                                         <i class="fas fa-edit"></i> 编辑
                                     </a>

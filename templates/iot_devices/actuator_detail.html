@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ actuator.name }} - NovaCloud{% endblock %}
+
+{% block content %}
+<div class="content-section">
+    <div class="section-header">
+        <h1>执行器详情</h1>
+        <div class="header-actions">
+            <a href="{% url 'iot_devices:actuator_update' actuator.id %}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> 编辑执行器
+            </a>
+            <a href="{% url 'iot_devices:actuator_delete' actuator.id %}" class="btn btn-danger">
+                <i class="fas fa-trash"></i> 删除执行器
+            </a>
+        </div>
+    </div>
+    
+    <div class="detail-card">
+        <div class="detail-header">
+            <h2>{{ actuator.name }}</h2>
+        </div>
+        
+        <div class="detail-body">
+            <div class="detail-row">
+                <div class="detail-label">执行器名称:</div>
+                <div class="detail-value">{{ actuator.name }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">执行器类型:</div>
+                <div class="detail-value">{{ actuator.actuator_type }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">命令键名:</div>
+                <div class="detail-value">{{ actuator.command_key }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">当前状态:</div>
+                <div class="detail-value">{{ actuator.current_state|default:"-" }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">所属设备:</div>
+                <div class="detail-value">
+                    <a href="{% url 'iot_devices:device_detail' device.device_id %}">
+                        {{ device.name }} ({{ device.device_id }})
+                    </a>
+                </div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">创建时间:</div>
+                <div class="detail-value">{{ actuator.created_at|date:"Y-m-d H:i" }}</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 最近数据记录部分 -->
+    <div class="sub-section">
+        <div class="section-header">
+            <h2>最近数据记录</h2>
+            <a href="{% url 'iot_devices:actuator_data_list' actuator.id %}?type=data" class="btn btn-info">
+                <i class="fas fa-list"></i> 查看所有数据
+            </a>
+        </div>
+        
+        {% if recent_data %}
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>记录时间</th>
+                            <th>状态值</th>
+                            <th>数据来源</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for data_point in recent_data %}
+                        <tr>
+                            <td>{{ data_point.timestamp|date:"Y-m-d H:i:s" }}</td>
+                            <td>{{ data_point.value }}</td>
+                            <td>{{ data_point.source }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="no-data">
+                <p>暂无数据记录。</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- 最近命令记录部分 -->
+    <div class="sub-section">
+        <div class="section-header">
+            <h2>最近命令记录</h2>
+            <a href="{% url 'iot_devices:actuator_data_list' actuator.id %}?type=command" class="btn btn-info">
+                <i class="fas fa-list"></i> 查看所有命令
+            </a>
+        </div>
+        
+        {% if recent_commands %}
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>发送时间</th>
+                            <th>命令值</th>
+                            <th>状态</th>
+                            <th>来源</th>
+                            <th>来源详情</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for command in recent_commands %}
+                        <tr>
+                            <td>{{ command.timestamp|date:"Y-m-d H:i:s" }}</td>
+                            <td>{{ command.command_value }}</td>
+                            <td>
+                                <span class="badge {% if command.status == 'success' %}badge-success{% elif command.status == 'pending' %}badge-warning{% else %}badge-danger{% endif %}">
+                                    {{ command.get_status_display }}
+                                </span>
+                            </td>
+                            <td>{{ command.get_source_display }}</td>
+                            <td>{{ command.source_detail|default:"-" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="no-data">
+                <p>暂无命令记录。</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    <div class="back-link">
+        <a href="{% url 'iot_devices:device_detail' device.device_id %}" class="btn btn-light">
+            <i class="fas fa-arrow-left"></i> 返回设备详情
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 保持一个空的脚本块以便于将来添加其他功能
+</script>
+{% endblock %} 

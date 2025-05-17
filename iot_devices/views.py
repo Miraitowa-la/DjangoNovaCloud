@@ -6,8 +6,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponseForbidden, JsonResponse
 from django.db.models import Q
+from django.utils import timezone
 
-from .models import Project, Device, Sensor, Actuator, SensorData
+from .models import Project, Device, Sensor, Actuator, SensorData, ActuatorData, ActuatorCommand
 from .forms import ProjectForm, DeviceForm, SensorForm, ActuatorForm
 
 import uuid
@@ -485,6 +486,15 @@ def control_actuator(request, pk):
             
             value = command_data['value']
             
+            # 记录命令
+            command_record = ActuatorCommand.objects.create(
+                actuator=actuator,
+                command_value=str(value),
+                source='user',
+                source_detail=request.user.username,
+                status='pending'
+            )
+            
             # 构建控制命令
             command = {
                 'target': actuator.command_key,
@@ -503,6 +513,18 @@ def control_actuator(request, pk):
                 actuator.current_state = str(value)
                 actuator.save()
                 
+                # 更新命令状态
+                command_record.status = 'success'
+                command_record.response_time = timezone.now()
+                command_record.save()
+                
+                # 记录数据点
+                ActuatorData.objects.create(
+                    actuator=actuator,
+                    value=str(value),
+                    source='system'
+                )
+                
                 return JsonResponse({
                     'success': True,
                     'message': '命令已发送',
@@ -510,6 +532,12 @@ def control_actuator(request, pk):
                     'new_state': actuator.current_state
                 })
             else:
+                # 更新命令状态为失败
+                command_record.status = 'failed'
+                command_record.response_time = timezone.now()
+                command_record.response_message = "MQTT发布失败"
+                command_record.save()
+                
                 return JsonResponse({
                     'success': False,
                     'message': '命令发送失败，请稍后重试'
@@ -522,6 +550,14 @@ def control_actuator(request, pk):
             }, status=400)
         except Exception as e:
             logger.error(f"控制执行器时出错: {str(e)}")
+            
+            # 如果已创建命令记录，更新为失败状态
+            if 'command_record' in locals():
+                command_record.status = 'failed'
+                command_record.response_time = timezone.now()
+                command_record.response_message = str(e)
+                command_record.save()
+                
             return JsonResponse({
                 'success': False,
                 'message': f'控制执行器时出错: {str(e)}'
@@ -531,3 +567,95 @@ def control_actuator(request, pk):
         'success': False,
         'message': '不支持的请求方法'
     }, status=405)
+
+
+# 传感器数据视图
+class SensorDataListView(LoginRequiredMixin, ListView):
+    """传感器数据列表视图"""
+    model = SensorData
+    template_name = 'iot_devices/sensor_data_list.html'
+    context_object_name = 'data_records'
+    paginate_by = 20
+    
+    def get_queryset(self):
+        """获取传感器的所有数据记录"""
+        self.sensor = get_object_or_404(Sensor, id=self.kwargs['sensor_id'])
+        
+        # 检查用户是否有权限查看该传感器的数据
+        if self.sensor.device.project.owner != self.request.user:
+            return SensorData.objects.none()
+            
+        return SensorData.objects.filter(sensor=self.sensor).order_by('-timestamp')
+    
+    def get_context_data(self, **kwargs):
+        """添加传感器和设备到上下文"""
+        context = super().get_context_data(**kwargs)
+        context['sensor'] = self.sensor
+        context['device'] = self.sensor.device
+        return context
+
+
+# 执行器详情视图
+class ActuatorDetailView(LoginRequiredMixin, DetailView):
+    """执行器详情视图（含数据可视化）"""
+    model = Actuator
+    template_name = 'iot_devices/actuator_detail.html'
+    context_object_name = 'actuator'
+    
+    def get_object(self):
+        """获取执行器，确保用户有权限"""
+        actuator = get_object_or_404(Actuator, id=self.kwargs['pk'])
+        if actuator.device.project.owner != self.request.user:
+            raise HttpResponseForbidden("您没有权限查看此执行器")
+        return actuator
+    
+    def get_context_data(self, **kwargs):
+        """添加额外数据到上下文"""
+        context = super().get_context_data(**kwargs)
+        context['device'] = self.object.device
+        
+        # 添加最近的执行器数据（最多10条）
+        context['recent_data'] = ActuatorData.objects.filter(actuator=self.object).order_by('-timestamp')[:10]
+        
+        # 添加最近的命令记录（最多10条）
+        context['recent_commands'] = ActuatorCommand.objects.filter(actuator=self.object).order_by('-timestamp')[:10]
+        
+        return context
+
+
+# 执行器数据视图
+class ActuatorDataListView(LoginRequiredMixin, ListView):
+    """执行器数据列表视图"""
+    model = ActuatorData
+    template_name = 'iot_devices/actuator_data_list.html'
+    context_object_name = 'data_records'
+    paginate_by = 20
+    
+    def get_queryset(self):
+        """获取执行器的所有数据记录"""
+        self.actuator = get_object_or_404(Actuator, id=self.kwargs['actuator_id'])
+        
+        # 检查用户是否有权限查看该执行器的数据
+        if self.actuator.device.project.owner != self.request.user:
+            return ActuatorData.objects.none()
+        
+        # 获取数据类型（数据或命令）
+        data_type = self.request.GET.get('type', 'data')
+        
+        if data_type == 'command':
+            # 如果是命令记录，则返回命令列表
+            return ActuatorCommand.objects.filter(actuator=self.actuator).order_by('-timestamp')
+        else:
+            # 默认返回数据记录
+            return ActuatorData.objects.filter(actuator=self.actuator).order_by('-timestamp')
+    
+    def get_context_data(self, **kwargs):
+        """添加执行器和设备到上下文"""
+        context = super().get_context_data(**kwargs)
+        context['actuator'] = self.actuator
+        context['device'] = self.actuator.device
+        
+        # 添加数据类型
+        context['data_type'] = self.request.GET.get('type', 'data')
+        
+        return context

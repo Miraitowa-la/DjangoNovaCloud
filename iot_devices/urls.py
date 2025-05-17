@@ -24,14 +24,18 @@ urlpatterns = [
     path('sensors/<int:pk>/', views.SensorDetailView.as_view(), name='sensor_detail'),
     path('sensors/<int:pk>/update/', views.SensorUpdateView.as_view(), name='sensor_update'),
     path('sensors/<int:pk>/delete/', views.SensorDeleteView.as_view(), name='sensor_delete'),
+    path('sensors/<int:sensor_id>/data/', views.SensorDataListView.as_view(), name='sensor_data_list'),
     
     # 执行器相关URLs
     path('devices/<str:device_id>/actuators/create/', views.ActuatorCreateView.as_view(), name='actuator_create'),
+    path('actuators/<int:pk>/', views.ActuatorDetailView.as_view(), name='actuator_detail'),
     path('actuators/<int:pk>/update/', views.ActuatorUpdateView.as_view(), name='actuator_update'),
     path('actuators/<int:pk>/delete/', views.ActuatorDeleteView.as_view(), name='actuator_delete'),
-    path('api/actuators/<int:pk>/control/', views.control_actuator, name='control_actuator'),
+    path('actuators/<int:pk>/control/', views.control_actuator, name='control_actuator'),
+    path('actuators/<int:actuator_id>/data/', views.ActuatorDataListView.as_view(), name='actuator_data_list'),
     
     # API URLs
     path('api/sensors/<int:sensor_id>/data/', api_views.SensorDataAPIView.as_view(), name='sensor_data_api'),
     path('api/actuators/<int:actuator_id>/', api_views.ActuatorDetailAPIView.as_view(), name='actuator_detail_api'),
+    path('api/actuators/<int:pk>/control/', views.control_actuator, name='control_actuator'),
 ] 

@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if action == '添加' %}添加动作{% else %}编辑动作{% endif %} - NovaCloud{% endblock %}
+
+{% block content %}
+<div class="content-section">
+    <div class="section-header">
+        <h1>{% if action == '添加' %}添加动作{% else %}编辑动作{% endif %}</h1>
+    </div>
+    
+    <div class="strategy-info">
+        <h2>策略：{{ strategy.name }}</h2>
+        <div class="strategy-meta">
+            <span class="badge {% if strategy.is_enabled %}badge-success{% else %}badge-secondary{% endif %}">
+                {% if strategy.is_enabled %}已启用{% else %}已禁用{% endif %}
+            </span>
+            <span class="device-info">触发设备：{{ strategy.trigger_source_device.name }}</span>
+        </div>
+    </div>
+    
+    <div class="form-container">
+        <form method="post" novalidate id="actionForm">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.action_type.id_for_label }}">动作类型</label>
+                {{ form.action_type }}
+                {% if form.action_type.errors %}
+                <div class="field-error">{{ form.action_type.errors }}</div>
+                {% endif %}
+                <small class="form-text text-muted">选择条件满足时要执行的动作类型。</small>
+            </div>
+            
+            <!-- 邮件通知设置 -->
+            <div class="action-section" id="email-section">
+                <h3>邮件通知设置</h3>
+                
+                <div class="form-group">
+                    <label for="{{ form.recipient_user.id_for_label }}">接收用户</label>
+                    {{ form.recipient_user }}
+                    {% if form.recipient_user.errors %}
+                    <div class="field-error">{{ form.recipient_user.errors }}</div>
+                    {% endif %}
+                    <small class="form-text text-muted">选择接收通知的用户。如留空，将通知发送给项目所有者。</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.recipient_email.id_for_label }}">或直接输入邮箱地址</label>
+                    {{ form.recipient_email }}
+                    {% if form.recipient_email.errors %}
+                    <div class="field-error">{{ form.recipient_email.errors }}</div>
+                    {% endif %}
+                    <small class="form-text text-muted">可以直接输入接收通知的电子邮箱。</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.notification_subject_template.id_for_label }}">邮件主题</label>
+                    {{ form.notification_subject_template }}
+                    {% if form.notification_subject_template.errors %}
+                    <div class="field-error">{{ form.notification_subject_template.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.notification_body_template.id_for_label }}">邮件内容</label>
+                    {{ form.notification_body_template }}
+                    {% if form.notification_body_template.errors %}
+                    <div class="field-error">{{ form.notification_body_template.errors }}</div>
+                    {% endif %}
+                    <small class="form-text text-muted">
+                        可使用以下占位符：<br>
+                        {{device.name}} - 设备名称<br>
+                        {{sensor.name}} - 传感器名称<br>
+                        {{value}} - 传感器值<br>
+                        {{unit}} - 单位<br>
+                        {{timestamp}} - 触发时间
+                    </small>
+                </div>
+            </div>
+            
+            <!-- 执行器控制设置 -->
+            <div class="action-section" id="actuator-section">
+                <h3>执行器控制设置</h3>
+                
+                <div class="form-group">
+                    <label for="{{ form.target_actuator.id_for_label }}">目标执行器</label>
+                    {{ form.target_actuator }}
+                    {% if form.target_actuator.errors %}
+                    <div class="field-error">{{ form.target_actuator.errors }}</div>
+                    {% endif %}
+                    <small class="form-text text-muted">选择要控制的执行器。</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.actuator_command.id_for_label }}">执行器命令</label>
+                    {{ form.actuator_command }}
+                    {% if form.actuator_command.errors %}
+                    <div class="field-error">{{ form.actuator_command.errors }}</div>
+                    {% endif %}
+                    <small class="form-text text-muted">如"ON"/"OFF"等简单命令，或复杂命令的JSON字符串。</small>
+                </div>
+            </div>
+            
+            <!-- WebHook设置 -->
+            <div class="action-section" id="webhook-section">
+                <h3>WebHook设置</h3>
+                
+                <div class="form-group">
+                    <label for="{{ form.webhook_url.id_for_label }}">WebHook URL</label>
+                    {{ form.webhook_url }}
+                    {% if form.webhook_url.errors %}
+                    <div class="field-error">{{ form.webhook_url.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.webhook_method.id_for_label }}">HTTP方法</label>
+                    {{ form.webhook_method }}
+                    {% if form.webhook_method.errors %}
+                    <div class="field-error">{{ form.webhook_method.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.webhook_payload_template.id_for_label }}">WebHook载荷模板</label>
+                    {{ form.webhook_payload_template }}
+                    {% if form.webhook_payload_template.errors %}
+                    <div class="field-error">{{ form.webhook_payload_template.errors }}</div>
+                    {% endif %}
+                    <small class="form-text text-muted">JSON格式，可以使用与邮件内容相同的占位符。</small>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> 保存
+                    </button>
+                    <a href="{% url 'strategy_engine:strategy_detail' strategy.pk %}" class="btn btn-light">
+                        <i class="fas fa-times"></i> 取消
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 获取元素
+        const actionTypeSelector = document.getElementById('{{ form.action_type.id_for_label }}');
+        const emailSection = document.getElementById('email-section');
+        const actuatorSection = document.getElementById('actuator-section');
+        const webhookSection = document.getElementById('webhook-section');
+        
+        // 初始化显示/隐藏
+        updateActionSections();
+        
+        // 添加事件监听器
+        actionTypeSelector.addEventListener('change', updateActionSections);
+        
+        function updateActionSections() {
+            const selectedType = actionTypeSelector.value;
+            
+            // 隐藏所有部分
+            emailSection.style.display = 'none';
+            actuatorSection.style.display = 'none';
+            webhookSection.style.display = 'none';
+            
+            // 显示选中类型的部分
+            if (selectedType === 'send_email_notification') {
+                emailSection.style.display = 'block';
+            } else if (selectedType === 'control_actuator') {
+                actuatorSection.style.display = 'block';
+            } else if (selectedType === 'webhook') {
+                webhookSection.style.display = 'block';
+            }
+        }
+    });
+</script>
+{% endblock %} 

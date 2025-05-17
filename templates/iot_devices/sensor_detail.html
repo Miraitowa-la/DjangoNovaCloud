@@ -97,6 +97,9 @@
     <div class="sub-section">
         <div class="section-header">
             <h2>最近数据记录</h2>
+            <a href="{% url 'iot_devices:sensor_data_list' sensor.id %}" class="btn btn-info">
+                <i class="fas fa-list"></i> 查看所有记录
+            </a>
         </div>
         
         {% if recent_data %}

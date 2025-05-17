@@ -1,0 +1,372 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ strategy.name }} - 策略详情 - NovaCloud{% endblock %}
+
+{% block content %}
+<div class="content-section">
+    <div class="section-header">
+        <h1>策略详情</h1>
+        <div class="header-actions">
+            <a href="{% url 'strategy_engine:strategy_update' strategy.pk %}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> 编辑策略
+            </a>
+            <a href="{% url 'strategy_engine:strategy_delete' strategy.pk %}" class="btn btn-danger">
+                <i class="fas fa-trash"></i> 删除策略
+            </a>
+            <button id="toggleStrategy" class="btn {% if strategy.is_enabled %}btn-secondary{% else %}btn-success{% endif %}" 
+                    data-strategy-id="{{ strategy.pk }}" 
+                    data-enabled="{{ strategy.is_enabled|yesno:'true,false' }}">
+                {% if strategy.is_enabled %}
+                    <i class="fas fa-pause"></i> 禁用策略
+                {% else %}
+                    <i class="fas fa-play"></i> 启用策略
+                {% endif %}
+            </button>
+        </div>
+    </div>
+    
+    <div class="detail-card">
+        <div class="detail-header">
+            <h2>{{ strategy.name }}</h2>
+            <span class="badge {% if strategy.is_enabled %}badge-success{% else %}badge-secondary{% endif %}">
+                {% if strategy.is_enabled %}已启用{% else %}已禁用{% endif %}
+            </span>
+        </div>
+        
+        <div class="detail-body">
+            <div class="detail-row">
+                <div class="detail-label">所属项目:</div>
+                <div class="detail-value">
+                    <a href="{% url 'iot_devices:project_detail' strategy.project.project_id %}">
+                        {{ strategy.project.name }}
+                    </a>
+                    <span class="badge badge-primary">{{ strategy.project.project_id }}</span>
+                </div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">触发设备:</div>
+                <div class="detail-value">
+                    <a href="{% url 'iot_devices:device_detail' strategy.trigger_source_device.device_id %}">
+                        {{ strategy.trigger_source_device.name }}
+                    </a>
+                    <span class="badge badge-info">{{ strategy.trigger_source_device.device_id }}</span>
+                </div>
+            </div>
+            {% if strategy.description %}
+            <div class="detail-row">
+                <div class="detail-label">描述:</div>
+                <div class="detail-value">{{ strategy.description }}</div>
+            </div>
+            {% endif %}
+            <div class="detail-row">
+                <div class="detail-label">创建时间:</div>
+                <div class="detail-value">{{ strategy.created_at|date:"Y-m-d H:i" }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">最后更新:</div>
+                <div class="detail-value">{{ strategy.updated_at|date:"Y-m-d H:i" }}</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 条件部分 -->
+    <div class="sub-section">
+        <div class="section-header">
+            <h2>触发条件</h2>
+            <a href="{% url 'strategy_engine:condition_create' strategy.pk %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> 添加条件
+            </a>
+        </div>
+        
+        {% if conditions %}
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>序号</th>
+                            <th>传感器</th>
+                            <th>运算符</th>
+                            <th>阈值</th>
+                            <th>逻辑关系</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for condition in conditions %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ condition.sensor.name }}</td>
+                            <td>{{ condition.get_operator_display }}</td>
+                            <td>
+                                {% if condition.threshold_value_type == 'float' %}
+                                    {{ condition.threshold_value_float }} {% if condition.sensor.unit %}{{ condition.sensor.unit }}{% endif %}
+                                {% elif condition.threshold_value_type == 'string' %}
+                                    "{{ condition.threshold_value_string }}"
+                                {% elif condition.threshold_value_type == 'boolean' %}
+                                    {{ condition.threshold_value_boolean|yesno:"是,否" }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if condition.logical_operator_to_next %}
+                                    <span class="badge badge-info">{{ condition.get_logical_operator_to_next_display }}</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">最后一个条件</span>
+                                {% endif %}
+                            </td>
+                            <td class="actions">
+                                <a href="{% url 'strategy_engine:condition_update' condition.pk %}" class="btn btn-warning btn-sm">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'strategy_engine:condition_delete' condition.pk %}" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i> 此策略没有设置任何条件，添加至少一个条件使策略生效。
+            </div>
+            <div class="text-center py-3">
+                <a href="{% url 'strategy_engine:condition_create' strategy.pk %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> 添加第一个条件
+                </a>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- 动作部分 -->
+    <div class="sub-section">
+        <div class="section-header">
+            <h2>执行动作</h2>
+            <a href="{% url 'strategy_engine:action_create' strategy.pk %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> 添加动作
+            </a>
+        </div>
+        
+        {% if actions %}
+            <div class="card-grid">
+                {% for action in actions %}
+                    <div class="card action-card">
+                        <div class="card-header">
+                            <h3>
+                                {% if action.action_type == 'send_email_notification' %}
+                                    <i class="fas fa-envelope"></i>
+                                {% elif action.action_type == 'control_actuator' %}
+                                    <i class="fas fa-cogs"></i>
+                                {% elif action.action_type == 'webhook' %}
+                                    <i class="fas fa-link"></i>
+                                {% endif %}
+                                {{ action.get_action_type_display }}
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            {% if action.action_type == 'send_email_notification' %}
+                                <div class="action-detail-row">
+                                    <span class="action-detail-label">接收者:</span>
+                                    <span class="action-detail-value">
+                                        {% if action.recipient_user %}
+                                            {{ action.recipient_user.username }}
+                                        {% elif action.recipient_email %}
+                                            {{ action.recipient_email }}
+                                        {% else %}
+                                            项目所有者
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="action-detail-row">
+                                    <span class="action-detail-label">主题:</span>
+                                    <span class="action-detail-value">{{ action.notification_subject_template }}</span>
+                                </div>
+                                {% if action.notification_body_template %}
+                                <div class="action-detail-row">
+                                    <span class="action-detail-label">内容:</span>
+                                    <div class="action-detail-value template-preview">
+                                        {{ action.notification_body_template }}
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% elif action.action_type == 'control_actuator' %}
+                                <div class="action-detail-row">
+                                    <span class="action-detail-label">目标执行器:</span>
+                                    <span class="action-detail-value">
+                                        {% if action.target_actuator %}
+                                            {{ action.target_actuator.name }} ({{ action.target_actuator.device.name }})
+                                        {% else %}
+                                            未指定
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="action-detail-row">
+                                    <span class="action-detail-label">命令:</span>
+                                    <span class="action-detail-value command-preview">{{ action.actuator_command }}</span>
+                                </div>
+                            {% elif action.action_type == 'webhook' %}
+                                <div class="action-detail-row">
+                                    <span class="action-detail-label">URL:</span>
+                                    <span class="action-detail-value">{{ action.webhook_url }}</span>
+                                </div>
+                                <div class="action-detail-row">
+                                    <span class="action-detail-label">方法:</span>
+                                    <span class="action-detail-value">{{ action.webhook_method }}</span>
+                                </div>
+                                {% if action.webhook_payload_template %}
+                                <div class="action-detail-row">
+                                    <span class="action-detail-label">负载:</span>
+                                    <div class="action-detail-value template-preview">
+                                        {{ action.webhook_payload_template }}
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                        <div class="card-footer">
+                            <div class="btn-group">
+                                <a href="{% url 'strategy_engine:action_update' action.pk %}" class="btn btn-warning">
+                                    <i class="fas fa-edit"></i> 编辑
+                                </a>
+                                <a href="{% url 'strategy_engine:action_delete' action.pk %}" class="btn btn-danger">
+                                    <i class="fas fa-trash"></i> 删除
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i> 此策略没有设置任何动作，添加至少一个动作使策略生效。
+            </div>
+            <div class="text-center py-3">
+                <a href="{% url 'strategy_engine:action_create' strategy.pk %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> 添加第一个动作
+                </a>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- 执行日志部分 -->
+    <div class="sub-section">
+        <div class="section-header">
+            <h2>最近执行日志</h2>
+            <a href="{% url 'strategy_engine:strategy_log_list' strategy.pk %}" class="btn btn-info">
+                <i class="fas fa-list"></i> 查看所有日志
+            </a>
+        </div>
+        
+        {% if recent_logs %}
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>时间</th>
+                            <th>动作</th>
+                            <th>结果</th>
+                            <th>信息</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in recent_logs %}
+                        <tr>
+                            <td>{{ log.timestamp|date:"Y-m-d H:i:s" }}</td>
+                            <td>{{ log.action.get_action_type_display }}</td>
+                            <td>
+                                <span class="badge {% if log.result %}badge-success{% else %}badge-danger{% endif %}">
+                                    {% if log.result %}成功{% else %}失败{% endif %}
+                                </span>
+                            </td>
+                            <td>{{ log.message|default:"" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> 此策略尚无执行记录。
+            </div>
+        {% endif %}
+    </div>
+    
+    <div class="back-link">
+        <a href="{% url 'strategy_engine:strategy_list' strategy.project.project_id %}" class="btn btn-light">
+            <i class="fas fa-arrow-left"></i> 返回策略列表
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 绑定策略启用/禁用按钮点击事件
+        document.getElementById('toggleStrategy').addEventListener('click', function() {
+            const strategyId = this.dataset.strategyId;
+            const enabled = this.dataset.enabled === 'true';
+            
+            // 发送AJAX请求
+            fetch(`/strategies/${strategyId}/toggle/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCsrfToken(),
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // 更新按钮状态
+                    this.dataset.enabled = data.is_enabled ? 'true' : 'false';
+                    
+                    // 更新按钮文本和样式
+                    if (data.is_enabled) {
+                        this.innerHTML = '<i class="fas fa-pause"></i> 禁用策略';
+                        this.classList.remove('btn-success');
+                        this.classList.add('btn-secondary');
+                    } else {
+                        this.innerHTML = '<i class="fas fa-play"></i> 启用策略';
+                        this.classList.remove('btn-secondary');
+                        this.classList.add('btn-success');
+                    }
+                    
+                    // 更新状态标签
+                    const statusBadge = document.querySelector('.detail-header .badge');
+                    if (data.is_enabled) {
+                        statusBadge.textContent = '已启用';
+                        statusBadge.classList.remove('badge-secondary');
+                        statusBadge.classList.add('badge-success');
+                    } else {
+                        statusBadge.textContent = '已禁用';
+                        statusBadge.classList.remove('badge-success');
+                        statusBadge.classList.add('badge-secondary');
+                    }
+                    
+                    // 刷新页面以显示成功消息
+                    location.reload();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('操作失败，请重试');
+            });
+        });
+    });
+    
+    // 获取CSRF令牌
+    function getCsrfToken() {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.startsWith('csrftoken=')) {
+                return cookie.substring('csrftoken='.length, cookie.length);
+            }
+        }
+        return '';
+    }
+</script>
+{% endblock %} 

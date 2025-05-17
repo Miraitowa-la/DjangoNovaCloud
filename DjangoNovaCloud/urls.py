@@ -23,4 +23,5 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('', include('iot_devices.urls')),
     path('', include('mqtt_client.urls')),
+    path('', include('strategy_engine.urls')),
 ]
