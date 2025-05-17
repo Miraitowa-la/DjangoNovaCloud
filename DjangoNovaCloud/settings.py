@@ -40,12 +40,14 @@ INSTALLED_APPS = [
     
     # 第三方应用
     'rest_framework',
+    'channels',
     
     # 自定义应用
     'accounts',
     'core',
     'iot_devices',
     'mqtt_client',
+    'tcp_server',
 ]
 
 MIDDLEWARE = [
@@ -77,6 +79,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'DjangoNovaCloud.wsgi.application'
+ASGI_APPLICATION = 'DjangoNovaCloud.asgi.application'
 
 
 # Database
@@ -171,3 +174,20 @@ MQTT_CONFIG = {
 
 # 是否在Django启动时自动连接MQTT
 MQTT_AUTO_CONNECT = True
+
+# TCP服务器配置
+TCP_SERVER_CONFIG = {
+    'HOST': '0.0.0.0',       # 监听所有接口
+    'PORT': 9000,            # TCP服务端口
+    'BUFFER_SIZE': 1024,     # 接收缓冲区大小
+    'FRAME_DELIMITER': b'\n',  # 帧分隔符（这里使用换行符作为消息分隔）
+    'MAX_MESSAGE_SIZE': 131072,  # 最大消息大小（128KB）
+    'CONNECTION_TIMEOUT': 300,  # 连接超时时间（秒）
+}
+
+# Channels配置
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}

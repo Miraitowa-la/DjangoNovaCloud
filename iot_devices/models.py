@@ -29,12 +29,18 @@ class Device(models.Model):
         ('unregistered', '未注册'),
     )
     
+    PROTOCOL_CHOICES = (
+        ('mqtt', 'MQTT'),
+        ('tcp', 'TCP原生'),
+    )
+    
     device_id = models.CharField('设备号', max_length=20, unique=True, help_text="例如：DEV-YYYYYY")
     device_identifier = models.CharField('设备标识', max_length=100, unique=True, help_text="可以是MAC地址、序列号等")
     device_key = models.CharField('设备密钥', max_length=64, blank=True, help_text="用于设备认证")
     name = models.CharField('设备名称', max_length=100)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='devices', verbose_name='所属项目')
     status = models.CharField('设备状态', max_length=20, choices=STATUS_CHOICES, default='unregistered')
+    protocol_type = models.CharField('通信协议', max_length=20, choices=PROTOCOL_CHOICES, default='mqtt')
     last_seen = models.DateTimeField('最后在线时间', blank=True, null=True)
     created_at = models.DateTimeField('创建时间', auto_now_add=True)
     updated_at = models.DateTimeField('更新时间', auto_now=True)
