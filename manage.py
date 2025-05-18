@@ -1,8 +1,15 @@
 #!/usr/bin/env python
-"""Django's command-line utility for administrative tasks."""
+# -*- coding: utf-8 -*-
 import os
 import sys
+import io
 
+# 设置环境变量禁用Python输出缓冲
+os.environ['PYTHONUNBUFFERED'] = '1'
+
+# 设置标准输出编码为UTF-8并禁用缓冲
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace', write_through=True)
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace', write_through=True)
 
 def main():
     """Run administrative tasks."""

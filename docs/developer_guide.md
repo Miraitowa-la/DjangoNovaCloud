@@ -1513,3 +1513,4 @@ python manage.py collectstatic
 # 使用debugpy进行远程调试
 python -m debugpy --listen 0.0.0.0:5678 --wait-for-client manage.py runserver 0.0.0.0:8000
 ``` 
+ 

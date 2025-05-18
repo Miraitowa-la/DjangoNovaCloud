@@ -230,30 +230,84 @@ LOGGING = {
             'format': '{levelname} {asctime} {module} {message}',
             'style': '{',
         },
+        'debug': {
+            'format': '{levelname} {asctime} {module} {pathname} {lineno} {message}',
+            'style': '{',
+        },
     },
     'handlers': {
         'file': {
             'level': 'INFO',
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',  # 改用RotatingFileHandler
             'filename': os.path.join(BASE_DIR, 'logs/django.log'),
             'formatter': 'verbose',
+            'encoding': 'utf-8',
+            'maxBytes': 10 * 1024 * 1024,  # 10 MB
+            'backupCount': 5,
         },
         'security': {
             'level': 'INFO',
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',  # 改用RotatingFileHandler
             'filename': os.path.join(BASE_DIR, 'logs/security.log'),
             'formatter': 'verbose',
+            'encoding': 'utf-8',
+            'maxBytes': 10 * 1024 * 1024,  # 10 MB
+            'backupCount': 5,
+        },
+        'debug_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',  # 改用RotatingFileHandler
+            'filename': os.path.join(BASE_DIR, 'logs/debug.log'),
+            'formatter': 'debug',
+            'encoding': 'utf-8',
+            'maxBytes': 10 * 1024 * 1024,  # 10 MB
+            'backupCount': 5,
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'debug',
         },
     },
     'loggers': {
+        'django': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
         'django.security': {
-            'handlers': ['security'],
+            'handlers': ['security', 'console'],
             'level': 'INFO',
             'propagate': True,
         },
         'app.security': {  # 自定义安全日志
-            'handlers': ['security'],
+            'handlers': ['security', 'console'],
             'level': 'INFO',
+            'propagate': False,
+        },
+        'accounts': {  # 用户认证相关日志
+            'handlers': ['file', 'security', 'debug_file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'iot_devices': {  # 设备操作相关日志
+            'handlers': ['file', 'security', 'debug_file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'mqtt_client': {  # MQTT通信相关日志
+            'handlers': ['file', 'security', 'debug_file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'strategy_engine': {  # 策略执行相关日志
+            'handlers': ['file', 'security', 'debug_file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'debug': {  # 调试日志
+            'handlers': ['debug_file', 'console'],
+            'level': 'DEBUG',
             'propagate': False,
         },
     },
