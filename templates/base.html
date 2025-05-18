@@ -26,9 +26,21 @@
                                 <button type="submit" class="logout-btn">退出登录</button>
                             </form>
                         </li>
+                        <li>
+                            <button id="theme-toggle" class="theme-toggle" aria-label="切换主题">
+                                <i class="fas fa-moon" id="dark-icon"></i>
+                                <i class="fas fa-sun" id="light-icon" style="display:none;"></i>
+                            </button>
+                        </li>
                     {% else %}
                         <li><a href="{% url 'accounts:login' %}">登录</a></li>
                         <li><a href="{% url 'accounts:register' %}">注册</a></li>
+                        <li>
+                            <button id="theme-toggle" class="theme-toggle" aria-label="切换主题">
+                                <i class="fas fa-moon" id="dark-icon"></i>
+                                <i class="fas fa-sun" id="light-icon" style="display:none;"></i>
+                            </button>
+                        </li>
                     {% endif %}
                 </ul>
             </nav>
@@ -58,5 +70,66 @@
     </footer>
     
     {% block extra_js %}{% endblock %}
+
+    <script>
+        // 主题切换功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const body = document.body;
+            const themeToggle = document.getElementById('theme-toggle');
+            const darkIcon = document.getElementById('dark-icon');
+            const lightIcon = document.getElementById('light-icon');
+            
+            // 初始化主题设置
+            function initTheme() {
+                // 获取用户保存的主题或使用系统默认
+                let userTheme = localStorage.getItem('theme');
+                
+                // 如果没有已保存的主题，检查系统设置
+                if (!userTheme) {
+                    userTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                }
+                
+                // 应用主题
+                applyTheme(userTheme);
+            }
+            
+            // 应用主题
+            function applyTheme(theme) {
+                if (theme === 'dark') {
+                    body.classList.add('dark-mode');
+                    darkIcon.style.display = 'none';
+                    lightIcon.style.display = 'inline-block';
+                } else {
+                    body.classList.remove('dark-mode');
+                    darkIcon.style.display = 'inline-block';
+                    lightIcon.style.display = 'none';
+                }
+                
+                // 保存设置到localStorage
+                localStorage.setItem('theme', theme);
+            }
+            
+            // 切换主题
+            themeToggle.addEventListener('click', function() {
+                const currentTheme = localStorage.getItem('theme') || 
+                    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                
+                // 切换主题
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                applyTheme(newTheme);
+            });
+            
+            // 初始化主题
+            initTheme();
+            
+            // 监听系统主题变化
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+                // 只有在用户没有手动设置主题时才跟随系统变化
+                if (!localStorage.getItem('theme')) {
+                    applyTheme(e.matches ? 'dark' : 'light');
+                }
+            });
+        });
+    </script>
 </body>
 </html> 

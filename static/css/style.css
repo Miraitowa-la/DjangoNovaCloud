@@ -2,14 +2,66 @@
 
 /* 全局样式 */
 :root {
+    /* 共享变量 */
     --primary-color: #3498db;
     --secondary-color: #2980b9;
     --accent-color: #f39c12;
-    --bg-color: #f5f7fa;
-    --text-color: #333;
-    --border-color: #ddd;
     --success-color: #2ecc71;
     --error-color: #e74c3c;
+    
+    /* 浅色主题变量 (默认) */
+    --bg-color: #f5f7fa;
+    --text-color: #333;
+    --card-bg: #ffffff;
+    --feature-card-bg: #f8f9fa;
+    --nav-bg: #ffffff;
+    --border-color: #ddd;
+    --border-light: #eee;
+    --border-dashed: #eee;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --input-bg: #ffffff;
+    --input-text: #333;
+    --input-border: #ddd;
+    --table-header-bg: #f8f9fa;
+    --table-header-text: #495057;
+    --table-hover-bg: #f8f9fa;
+    --table-border: #ddd;
+    --device-key-bg: #f1f1f1;
+    --no-data-bg: #f8f9fa;
+    --no-data-text: #6c757d;
+    --select-bg: #ffffff;
+    --select-text: #333;
+    --select-border: #ddd;
+    --footer-bg: #333;
+    --footer-text: #ffffff;
+}
+
+/* 深色主题变量 */
+body.dark-mode {
+    --bg-color: #121212;
+    --text-color: #f8f9fa;
+    --card-bg: #1e1e1e;
+    --feature-card-bg: #242424;
+    --nav-bg: #1a1a1a;
+    --border-color: #444444;
+    --border-light: #333333;
+    --border-dashed: #333333;
+    --shadow-color: rgba(255, 255, 255, 0.05);
+    --input-bg: #2d2d2d;
+    --input-text: #f8f9fa;
+    --input-border: #555555;
+    --table-header-bg: #2a2a2a;
+    --table-header-text: #f8f9fa;
+    --table-hover-bg: #2a2a2a;
+    --table-border: #444444;
+    --device-key-bg: #2d2d2d;
+    --no-data-bg: #242424;
+    --no-data-text: #aaaaaa;
+    --select-bg: #2d2d2d;
+    --select-text: #f8f9fa;
+    --select-border: #555555;
+    --footer-bg: #1a1a1a;
+    --footer-text: #cccccc;
 }
 
 * {
@@ -68,8 +120,8 @@ a:hover {
 
 /* 头部样式 */
 .site-header {
-    background-color: white;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    background-color: var(--nav-bg);
+    box-shadow: 0 2px 5px var(--shadow-color);
     padding: 15px 0;
 }
 
@@ -88,16 +140,23 @@ a:hover {
 .main-nav ul {
     display: flex;
     list-style: none;
+    align-items: center;
 }
 
 .main-nav li {
     margin-left: 20px;
+    display: flex;
+    align-items: center;
+    height: 40px;
 }
 
 /* 退出登录按钮样式 */
 .logout-form {
     margin: 0;
     padding: 0;
+    display: flex;
+    align-items: center;
+    height: 100%;
 }
 
 .logout-btn {
@@ -116,6 +175,28 @@ a:hover {
     color: var(--secondary-color);
 }
 
+/* 主题切换按钮 */
+.theme-toggle {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.3s, transform 0.3s;
+    border-radius: 50%;
+    height: 40px;
+    width: 40px;
+}
+
+.theme-toggle:hover {
+    color: var(--secondary-color);
+    transform: rotate(15deg);
+}
+
 /* 主要内容区域 */
 .site-content {
     flex: 1;
@@ -124,8 +205,8 @@ a:hover {
 
 /* 页脚样式 */
 .site-footer {
-    background-color: #333;
-    color: white;
+    background-color: var(--footer-bg);
+    color: var(--footer-text);
     padding: 20px 0;
     text-align: center;
 }
@@ -135,9 +216,9 @@ a:hover {
     max-width: 500px;
     margin: 0 auto;
     padding: 30px;
-    background-color: white;
+    background-color: var(--card-bg);
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 10px var(--shadow-color);
 }
 
 .auth-form h2 {
@@ -229,9 +310,9 @@ a:hover {
 /* 仪表盘样式 */
 .dashboard {
     padding: 20px;
-    background-color: white;
+    background-color: var(--card-bg);
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 10px var(--shadow-color);
 }
 
 .dashboard h1 {
@@ -252,9 +333,9 @@ a:hover {
 
 .feature-card {
     padding: 20px;
-    background-color: #f8f9fa;
+    background-color: var(--feature-card-bg);
     border-radius: 6px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 1px 3px var(--shadow-color);
     transition: transform 0.3s, box-shadow 0.3s;
 }
 
@@ -294,9 +375,9 @@ a:hover {
 
 /* 添加物联网设备管理样式 */
 .content-section {
-    background-color: #fff;
+    background-color: var(--card-bg);
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 10px var(--shadow-color);
     padding: 25px;
     margin-bottom: 30px;
 }
@@ -306,7 +387,7 @@ a:hover {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--border-light);
     padding-bottom: 15px;
 }
 
@@ -329,17 +410,17 @@ a:hover {
 .data-table th, .data-table td {
     padding: 12px 15px;
     text-align: left;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .data-table th {
-    background-color: #f8f9fa;
-    color: #495057;
+    background-color: var(--table-header-bg);
+    color: var(--table-header-text);
     font-weight: 600;
 }
 
 .data-table tr:hover {
-    background-color: #f8f9fa;
+    background-color: var(--table-hover-bg);
 }
 
 .actions {
@@ -355,21 +436,22 @@ a:hover {
 .no-data {
     text-align: center;
     padding: 30px 20px;
-    background-color: #f8f9fa;
+    background-color: var(--no-data-bg);
     border-radius: 6px;
     margin: 20px 0;
 }
 
 .no-data p {
     margin-bottom: 15px;
-    color: #6c757d;
+    color: var(--no-data-text);
 }
 
 .detail-card {
-    background-color: #f8f9fa;
+    background-color: var(--card-bg);
     border-radius: 8px;
     padding: 20px;
-    margin-bottom: 25px;
+    box-shadow: 0 2px 10px var(--shadow-color);
+    margin-bottom: 20px;
 }
 
 .detail-header {
@@ -377,7 +459,7 @@ a:hover {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 15px;
-    border-bottom: 1px solid #e9ecef;
+    border-bottom: 1px solid var(--border-light);
     padding-bottom: 10px;
 }
 
@@ -389,18 +471,19 @@ a:hover {
 .detail-row {
     display: flex;
     margin-bottom: 10px;
-    border-bottom: 1px dashed #eee;
+    border-bottom: 1px dashed var(--border-dashed);
     padding-bottom: 10px;
 }
 
 .detail-label {
     width: 140px;
     font-weight: 600;
-    color: #495057;
+    color: var(--text-color);
 }
 
 .detail-value {
     flex: 1;
+    color: var(--text-color);
 }
 
 .badge {
@@ -458,12 +541,13 @@ a:hover {
 }
 
 .device-key {
-    background-color: #f1f1f1;
+    background-color: var(--device-key-bg);
     padding: 5px 10px;
     border-radius: 4px;
     font-family: monospace;
     overflow-x: auto;
     max-width: 300px;
+    color: var(--text-color);
 }
 
 .inline-form {
@@ -543,10 +627,10 @@ a:hover {
     position: relative;
     height: 400px;
     margin: 20px 0;
-    border: 1px solid #e0e0e0;
+    border: 1px solid var(--border-color);
     border-radius: 4px;
     padding: 10px;
-    background-color: #fff;
+    background-color: var(--card-bg);
 }
 
 .data-controls {
@@ -607,7 +691,7 @@ a:hover {
     width: 100%;
     height: 10px;
     border-radius: 5px;
-    background: #d3d3d3;
+    background: var(--border-color);
     outline: none;
 }
 
@@ -617,7 +701,7 @@ a:hover {
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    background: #4CAF50;
+    background: var(--primary-color);
     cursor: pointer;
 }
 
@@ -625,13 +709,14 @@ a:hover {
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    background: #4CAF50;
+    background: var(--primary-color);
     cursor: pointer;
 }
 
 .slider-value {
     text-align: center;
     font-weight: bold;
+    color: var(--text-color);
 }
 
 .custom-control {
@@ -646,6 +731,10 @@ a:hover {
 .custom-value {
     flex: 1;
     height: 34px;
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
 }
 
 .send-btn {
@@ -656,11 +745,16 @@ a:hover {
     height: 34px;
     line-height: 1;
     white-space: nowrap;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s;
 }
 
-.send-btn i {
-    display: inline-block;
-    margin-right: 3px;
+.send-btn:hover {
+    background-color: var(--secondary-color);
 }
 
 .action-buttons {
@@ -692,4 +786,240 @@ a:hover {
 .table-responsive {
     overflow-x: auto;
     margin-bottom: 20px;
+}
+
+select, input, textarea {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border: 1px solid var(--input-border);
+    border-radius: 4px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--input-bg);
+    color: var(--input-text);
+}
+
+/* 章节标题样式 */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-light);
+    padding-bottom: 15px;
+}
+
+.section-header h1, .section-header h2 {
+    margin: 0;
+    color: var(--primary-color);
+}
+
+/* 详情卡片标题样式 */
+.detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    border-bottom: 1px solid var(--border-light);
+    padding-bottom: 10px;
+}
+
+.detail-header h2 {
+    margin: 0;
+    color: var(--primary-color);
+}
+
+/* 详情行样式 */
+.detail-row {
+    display: flex;
+    margin-bottom: 10px;
+    border-bottom: 1px dashed var(--border-dashed);
+    padding-bottom: 10px;
+}
+
+.detail-label {
+    width: 140px;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.detail-value {
+    flex: 1;
+    color: var(--text-color);
+}
+
+/* 修复按钮样式 */
+.send-btn i {
+    display: inline-block;
+    margin-right: 3px;
+}
+
+/* 增强下拉框样式 */
+select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-color: var(--select-bg);
+    color: var(--select-text);
+    border: 1px solid var(--select-border);
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 14px;
+    width: 100%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    padding-right: 35px !important;
+}
+
+select:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.25);
+}
+
+/* 深色模式下的下拉框 */
+body.dark-mode select {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-mode select:hover {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+/* 下拉框分组样式 */
+.select-group {
+    margin-bottom: 15px;
+}
+
+.select-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+/* 数据控制中的下拉框样式 */
+.period-selector select, 
+.density-selector select {
+    min-width: 140px;
+    width: auto;
+    display: inline-block;
+}
+
+/* 表单中的下拉框 */
+.form-group select {
+    width: 100%;
+    padding: 10px 12px;
+}
+
+/* 小型下拉框 */
+select.select-sm {
+    padding: 6px 10px;
+    font-size: 13px;
+    padding-right: 30px !important;
+    background-position: right 10px center;
+    background-size: 14px;
+}
+
+/* 内联表单中的下拉框 */
+.inline-form select {
+    margin-right: 10px;
+    width: auto;
+}
+
+/* 移动设备上的下拉框优化 */
+@media (max-width: 768px) {
+    select {
+        font-size: 16px;  /* 避免iOS缩放 */
+        padding: 12px 15px;
+        padding-right: 40px !important;
+    }
+    
+    .period-selector select, 
+    .density-selector select {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .period-selector, 
+    .density-selector {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .data-controls {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+/* 移动设备样式优化 */
+@media (max-width: 768px) {
+    .site-header .container {
+        flex-direction: column;
+        position: relative;
+        padding-top: 10px;
+    }
+    
+    .main-nav {
+        margin-top: 15px;
+        width: 100%;
+    }
+    
+    .main-nav ul {
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+    }
+    
+    .main-nav li {
+        margin: 8px 0;
+        width: 100%;
+        text-align: center;
+        height: auto;
+        justify-content: center;
+    }
+    
+    .theme-toggle {
+        position: absolute;
+        right: 20px;
+        top: 20px;
+    }
+}
+
+/* 表格管理样式 */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table th, .data-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.data-table th {
+    background-color: var(--table-header-bg);
+    color: var(--table-header-text);
+    font-weight: bold;
+}
+
+.data-table tr:hover {
+    background-color: var(--table-hover-bg);
 } 
