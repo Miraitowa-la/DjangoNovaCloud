@@ -22,6 +22,21 @@ class ProjectForm(forms.ModelForm):
         for field_name, field in self.fields.items():
             field.widget.attrs['class'] = 'form-control'
 
+    def clean_name(self):
+        name = self.cleaned_data.get('name')
+        # 防止XSS攻击，检查名称中是否包含脚本标签
+        if '<script>' in name.lower() or '</script>' in name.lower():
+            raise forms.ValidationError('项目名称不能包含脚本标签')
+        return name
+
+    def clean_project_id(self):
+        project_id = self.cleaned_data.get('project_id')
+        # 确保项目ID只包含字母、数字和连字符
+        import re
+        if not re.match(r'^[A-Za-z0-9\-]+$', project_id):
+            raise forms.ValidationError('项目ID只能包含字母、数字和连字符')
+        return project_id
+
 
 class DeviceForm(forms.ModelForm):
     """设备表单"""
@@ -30,6 +45,7 @@ class DeviceForm(forms.ModelForm):
         fields = ['device_id', 'device_identifier', 'name', 'project', 'status']
         widgets = {
             'device_key': forms.TextInput(attrs={'readonly': 'readonly'}),
+            'protocol': forms.Select(choices=Device.PROTOCOL_CHOICES),
         }
         help_texts = {
             'device_id': '设备唯一标识，例如：DEV-YYYYYY',
@@ -73,12 +89,94 @@ class DeviceForm(forms.ModelForm):
         
         return cleaned_data
 
+    def clean_device_id(self):
+        device_id = self.cleaned_data.get('device_id')
+        # 确保设备ID只包含字母、数字和连字符
+        import re
+        if not re.match(r'^[A-Za-z0-9\-]+$', device_id):
+            raise forms.ValidationError('设备ID只能包含字母、数字和连字符')
+        return device_id
+    
+    def clean_device_identifier(self):
+        device_identifier = self.cleaned_data.get('device_identifier')
+        # 基本验证：确保设备标识符只包含合法字符
+        import re
+        # MAC地址格式验证 (XX:XX:XX:XX:XX:XX 或 XX-XX-XX-XX-XX-XX)
+        mac_pattern = r'^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$'
+        # UUID格式验证
+        uuid_pattern = r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+        # 其他允许的格式（如自定义ID）
+        custom_pattern = r'^[A-Za-z0-9\-_:\.]+$'
+        
+        if not (re.match(mac_pattern, device_identifier) or 
+                re.match(uuid_pattern, device_identifier) or
+                re.match(custom_pattern, device_identifier)):
+            raise forms.ValidationError('设备标识格式无效，请使用MAC地址、UUID或只包含字母、数字、连字符、下划线、冒号和点的标识符')
+        
+        return device_identifier
+    
+    def clean_name(self):
+        name = self.cleaned_data.get('name')
+        # 防止XSS攻击，检查名称中是否包含脚本标签
+        if '<script>' in name.lower() or '</script>' in name.lower():
+            raise forms.ValidationError('设备名称不能包含脚本标签')
+        return name
+
 
 class SensorForm(forms.ModelForm):
     """传感器表单"""
     class Meta:
         model = Sensor
         fields = ['name', 'sensor_type', 'unit', 'value_key']
+        help_texts = {
+            'sensor_type': '传感器类型，例如：temperature, humidity',
+            'unit': '单位，例如：°C, %',
+            'value_key': '设备数据中的键名，用于识别此传感器的值'
+        }
+    
+    def __init__(self, *args, **kwargs):
+        self.device = kwargs.pop('device', None)
+        super().__init__(*args, **kwargs)
+        
+        # 对字段添加样式类
+        for field_name, field in self.fields.items():
+            field.widget.attrs['class'] = 'form-control'
+    
+    def save(self, commit=True):
+        sensor = super().save(commit=False)
+        if self.device:
+            sensor.device = self.device
+        if commit:
+            sensor.save()
+        return sensor
+
+
+class ActuatorForm(forms.ModelForm):
+    """执行器表单"""
+    class Meta:
+        model = Actuator
+        fields = ['name', 'actuator_type', 'command_key', 'current_state']
+        help_texts = {
+            'actuator_type': '执行器类型，例如：switch, dimmer',
+            'command_key': '控制命令的键名，用于发送控制命令',
+            'current_state': '当前状态，例如：ON, OFF, 50%'
+        }
+    
+    def __init__(self, *args, **kwargs):
+        self.device = kwargs.pop('device', None)
+        super().__init__(*args, **kwargs)
+        
+        # 对字段添加样式类
+        for field_name, field in self.fields.items():
+            field.widget.attrs['class'] = 'form-control'
+    
+    def save(self, commit=True):
+        actuator = super().save(commit=False)
+        if self.device:
+            actuator.device = self.device
+        if commit:
+            actuator.save()
+        return actuator 
         help_texts = {
             'sensor_type': '传感器类型，例如：temperature, humidity',
             'unit': '单位，例如：°C, %',
