@@ -1113,18 +1113,21 @@ select.select-sm {
 
 /* 项目卡片样式 */
 .project-card {
-    flex: 0 0 calc(33.333% - 14px);
-    width: calc(33.333% - 14px);
+    flex: 0 0 calc(33.333% - 20px);
+    width: calc(33.333% - 20px);
     background-color: var(--card-background);
     border-radius: 8px;
     box-shadow: 0 4px 8px var(--card-shadow);
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform 0.3s, box-shadow 0.3s;
     overflow: hidden;
     border: 1px solid var(--card-border);
-    margin-bottom: 0;
+    margin-bottom: 20px;
+    margin-right: 10px;
+    margin-left: 10px;
 }
 
 .project-card:hover {
+    transform: translateY(-5px);
     box-shadow: 0 6px 12px var(--card-shadow-hover);
 }
 
@@ -1158,10 +1161,17 @@ select.select-sm {
 .project-card .meta-item {
     background-color: var(--card-meta-bg);
     color: var(--card-meta-text);
+    border-radius: 4px;
+    padding: 4px 8px;
+    display: inline-flex;
+    align-items: center;
+    margin-right: 8px;
+    margin-bottom: 6px;
 }
 
 .project-card .meta-item i {
     color: var(--card-meta-icon);
+    margin-right: 4px;
 }
 
 .project-card .card-footer {
@@ -1172,18 +1182,21 @@ select.select-sm {
 
 /* 设备卡片样式 */
 .device-card {
-    flex: 0 0 calc(33.333% - 14px);
-    width: calc(33.333% - 14px);
+    flex: 0 0 calc(33.333% - 20px);
+    width: calc(33.333% - 20px);
     background-color: var(--card-background);
     border-radius: 8px;
     box-shadow: 0 4px 8px var(--card-shadow);
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform 0.3s, box-shadow 0.3s;
     overflow: hidden;
     border: 1px solid var(--card-border);
-    margin-bottom: 0;
+    margin-bottom: 20px;
+    margin-right: 10px;
+    margin-left: 10px;
 }
 
 .device-card:hover {
+    transform: translateY(-5px);
     box-shadow: 0 6px 12px var(--card-shadow-hover);
 }
 
@@ -1213,10 +1226,17 @@ select.select-sm {
 .device-card .meta-item {
     background-color: var(--card-meta-bg);
     color: var(--card-meta-text);
+    border-radius: 4px;
+    padding: 4px 8px;
+    display: inline-flex;
+    align-items: center;
+    margin-right: 8px;
+    margin-bottom: 6px;
 }
 
 .device-card .meta-item i {
     color: var(--card-meta-icon);
+    margin-right: 4px;
 }
 
 .device-card .card-footer {
@@ -1227,18 +1247,21 @@ select.select-sm {
 
 /* 策略卡片样式 */
 .strategy-card {
-    flex: 0 0 calc(33.333% - 14px);
-    width: calc(33.333% - 14px);
+    flex: 0 0 calc(33.333% - 20px);
+    width: calc(33.333% - 20px);
     background-color: var(--card-background);
     border-radius: 8px;
     box-shadow: 0 4px 8px var(--card-shadow);
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform 0.3s, box-shadow 0.3s;
     overflow: hidden;
     border: 1px solid var(--card-border);
-    margin-bottom: 0;
+    margin-bottom: 20px;
+    margin-right: 10px;
+    margin-left: 10px;
 }
 
 .strategy-card:hover {
+    transform: translateY(-5px);
     box-shadow: 0 6px 12px var(--card-shadow-hover);
 }
 
@@ -1290,10 +1313,17 @@ select.select-sm {
 .strategy-card .meta-item {
     background-color: var(--card-meta-bg);
     color: var(--card-meta-text);
+    border-radius: 4px;
+    padding: 4px 8px;
+    display: inline-flex;
+    align-items: center;
+    margin-right: 8px;
+    margin-bottom: 6px;
 }
 
 .strategy-card .meta-item i {
     color: var(--card-meta-icon);
+    margin-right: 4px;
 }
 
 .strategy-card .card-footer {
@@ -1629,19 +1659,19 @@ body.dark-mode .device-card .status-badge.status-unregistered {
 /* 媒体查询 */
 @media (max-width: 992px) {
     .strategy-card,
-    .project-card,
-    .device-card {
-        flex: 0 0 calc(50% - 10px);
-        width: calc(50% - 10px);
+    .device-card,
+    .project-card {
+        flex: 0 0 calc(50% - 20px);
+        width: calc(50% - 20px);
     }
 }
 
 @media (max-width: 768px) {
     .strategy-card,
-    .project-card,
-    .device-card {
-        flex: 0 0 100%;
-        width: 100%;
+    .device-card,
+    .project-card {
+        flex: 0 0 calc(100% - 20px);
+        width: calc(100% - 20px);
     }
     
     .btn-group {
@@ -1662,4 +1692,95 @@ body.dark-mode .device-card .status-badge.status-unregistered {
     color: #ccc;
     margin-bottom: 1rem;
     text-align: center;
+}
+
+/* 确保卡片网格布局一致 */
+.strategy-grid,
+.device-grid,
+.project-grid {
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: -10px;
+    margin-right: -10px;
+    justify-content: flex-start;
+}
+
+/* 统一meta-item样式 */
+.meta-item {
+    background-color: var(--card-meta-bg);
+    color: var(--card-meta-text);
+    border-radius: 4px;
+    padding: 4px 8px;
+    display: inline-flex;
+    align-items: center;
+    margin-right: 8px;
+    margin-bottom: 6px;
+}
+
+.meta-item i {
+    color: var(--card-meta-icon);
+    margin-right: 4px;
+}
+
+/* 修复sensor-meta和actuator-meta样式，使用共同样式 */
+.sensor-meta span,
+.actuator-meta span {
+    padding: 5px 10px;
+    background-color: var(--feature-card-bg);
+    border-radius: 4px;
+    font-size: 0.9rem;
+    color: var(--card-meta-text);
+    display: inline-flex;
+    align-items: center;
+}
+
+.sensor-meta span i,
+.actuator-meta span i {
+    margin-right: 4px;
+    color: var(--card-meta-icon);
+}
+
+/* 增加选择器优先级，解决内联样式覆盖问题 */
+.content-section .project-card,
+.content-section .device-card,
+.content-section .strategy-card {
+    flex: 0 0 calc(33.333% - 20px) !important;
+    width: calc(33.333% - 20px) !important;
+    margin-bottom: 20px !important;
+    margin-right: 10px !important;
+    margin-left: 10px !important;
+    transition: transform 0.3s, box-shadow 0.3s !important;
+}
+
+.content-section .project-card:hover,
+.content-section .device-card:hover,
+.content-section .strategy-card:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 6px 12px var(--card-shadow-hover) !important;
+}
+
+.content-section .meta-item,
+.card-body .meta-item {
+    border-radius: 4px !important;
+    padding: 4px 8px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+}
+
+@media (max-width: 992px) {
+    .content-section .strategy-card,
+    .content-section .device-card,
+    .content-section .project-card {
+        flex: 0 0 calc(50% - 20px) !important;
+        width: calc(50% - 20px) !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .content-section .strategy-card,
+    .content-section .device-card,
+    .content-section .project-card {
+        flex: 0 0 calc(100% - 20px) !important;
+        width: calc(100% - 20px) !important;
+    }
 } 
