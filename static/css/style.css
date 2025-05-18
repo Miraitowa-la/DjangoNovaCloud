@@ -34,6 +34,31 @@
     --select-border: #ddd;
     --footer-bg: #333;
     --footer-text: #ffffff;
+    
+    /* 浅色主题的卡片变量 */
+    --card-background: #ffffff;
+    --card-border: #e0e0e0;
+    --card-shadow: rgba(0, 0, 0, 0.1);
+    --card-shadow-hover: rgba(0, 0, 0, 0.15);
+    
+    --card-header-bg: #f8f9fa;
+    --card-header-border: #e0e0e0;
+    --card-header-text: #333;
+    
+    --card-body-text: #555;
+    
+    --card-meta-bg: #f8f9fa;
+    --card-meta-text: #666;
+    --card-meta-icon: #888;
+    
+    --card-footer-bg: #f8f9fa;
+    --card-footer-border: #e0e0e0;
+    
+    /* 特殊卡片元素 */
+    --strategy-device-bg: #f0f7ff;
+    --strategy-device-border: #007bff;
+    --strategy-device-label: #555;
+    --strategy-device-name: #007bff;
 }
 
 /* 深色主题变量 */
@@ -62,6 +87,31 @@ body.dark-mode {
     --select-border: #555555;
     --footer-bg: #1a1a1a;
     --footer-text: #cccccc;
+    
+    /* 深色主题的卡片变量 */
+    --card-background: #1e1e1e;
+    --card-border: #444444;
+    --card-shadow: rgba(0, 0, 0, 0.2);
+    --card-shadow-hover: rgba(0, 0, 0, 0.35);
+    
+    --card-header-bg: #252525;
+    --card-header-border: #444444;
+    --card-header-text: #e0e0e0;
+    
+    --card-body-text: #cccccc;
+    
+    --card-meta-bg: #252525;
+    --card-meta-text: #b0b0b0;
+    --card-meta-icon: #777777;
+    
+    --card-footer-bg: #252525;
+    --card-footer-border: #444444;
+    
+    /* 特殊卡片元素 */
+    --strategy-device-bg: #1a2533;
+    --strategy-device-border: #0d6efd;
+    --strategy-device-label: #cccccc;
+    --strategy-device-name: #5a9cff;
 }
 
 * {
@@ -1022,4 +1072,557 @@ select.select-sm {
 
 .data-table tr:hover {
     background-color: var(--table-hover-bg);
+}
+
+/* 项目卡片样式 */
+.project-card {
+    flex: 0 0 calc(33.333% - 14px);
+    width: calc(33.333% - 14px);
+    background-color: var(--card-background);
+    border-radius: 8px;
+    box-shadow: 0 4px 8px var(--card-shadow);
+    transition: transform 0.2s, box-shadow 0.2s;
+    overflow: hidden;
+    border: 1px solid var(--card-border);
+    margin-bottom: 0;
+}
+
+.project-card:hover {
+    box-shadow: 0 6px 12px var(--card-shadow-hover);
+}
+
+.project-card .card-header {
+    padding: 15px 20px;
+    background-color: var(--card-header-bg);
+    border-bottom: 1px solid var(--card-header-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.project-card .card-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--card-header-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.project-card .card-body {
+    padding: 20px;
+    flex-grow: 1;
+}
+
+.project-card .card-body p {
+    color: var(--card-body-text);
+}
+
+.project-card .meta-item {
+    background-color: var(--card-meta-bg);
+    color: var(--card-meta-text);
+}
+
+.project-card .meta-item i {
+    color: var(--card-meta-icon);
+}
+
+.project-card .card-footer {
+    padding: 15px 20px;
+    background-color: var(--card-footer-bg);
+    border-top: 1px solid var(--card-footer-border);
+}
+
+/* 设备卡片样式 */
+.device-card {
+    flex: 0 0 calc(33.333% - 14px);
+    width: calc(33.333% - 14px);
+    background-color: var(--card-background);
+    border-radius: 8px;
+    box-shadow: 0 4px 8px var(--card-shadow);
+    transition: transform 0.2s, box-shadow 0.2s;
+    overflow: hidden;
+    border: 1px solid var(--card-border);
+    margin-bottom: 0;
+}
+
+.device-card:hover {
+    box-shadow: 0 6px 12px var(--card-shadow-hover);
+}
+
+.device-card .card-header {
+    padding: 15px 20px;
+    background-color: var(--card-header-bg);
+    border-bottom: 1px solid var(--card-header-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.device-card .card-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--card-header-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.device-card .card-body {
+    padding: 20px;
+    flex-grow: 1;
+}
+
+.device-card .meta-item {
+    background-color: var(--card-meta-bg);
+    color: var(--card-meta-text);
+}
+
+.device-card .meta-item i {
+    color: var(--card-meta-icon);
+}
+
+.device-card .card-footer {
+    padding: 15px 20px;
+    background-color: var(--card-footer-bg);
+    border-top: 1px solid var(--card-footer-border);
+}
+
+/* 策略卡片样式 */
+.strategy-card {
+    flex: 0 0 calc(33.333% - 14px);
+    width: calc(33.333% - 14px);
+    background-color: var(--card-background);
+    border-radius: 8px;
+    box-shadow: 0 4px 8px var(--card-shadow);
+    transition: transform 0.2s, box-shadow 0.2s;
+    overflow: hidden;
+    border: 1px solid var(--card-border);
+    margin-bottom: 0;
+}
+
+.strategy-card:hover {
+    box-shadow: 0 6px 12px var(--card-shadow-hover);
+}
+
+.strategy-card .card-header {
+    padding: 15px 20px;
+    background-color: var(--card-header-bg);
+    border-bottom: 1px solid var(--card-header-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.strategy-card .card-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--card-header-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.strategy-card .card-body {
+    padding: 20px;
+    flex-grow: 1;
+}
+
+.strategy-card .card-body p {
+    color: var(--card-body-text);
+}
+
+.strategy-card .strategy-device {
+    margin-bottom: 15px;
+    padding: 8px 12px;
+    background-color: var(--strategy-device-bg);
+    border-radius: 4px;
+    border-left: 3px solid var(--strategy-device-border);
+}
+
+.strategy-card .device-label {
+    font-weight: bold;
+    margin-right: 5px;
+    color: var(--strategy-device-label);
+}
+
+.strategy-card .device-name {
+    color: var(--strategy-device-name);
+}
+
+.strategy-card .meta-item {
+    background-color: var(--card-meta-bg);
+    color: var(--card-meta-text);
+}
+
+.strategy-card .meta-item i {
+    color: var(--card-meta-icon);
+}
+
+.strategy-card .card-footer {
+    padding: 15px 20px;
+    background-color: var(--card-footer-bg);
+    border-top: 1px solid var(--card-footer-border);
+}
+
+/* 状态徽章调整 */
+.status-label {
+    color: var(--card-meta-text);
+}
+
+/* 数据记录页面样式 - 传感器信息 */
+.sensor-info {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: var(--card-meta-bg);
+    border-radius: 8px;
+    box-shadow: 0 1px 3px var(--shadow-color);
+}
+
+.sensor-info h2 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+    color: var(--card-header-text);
+}
+
+.sensor-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.sensor-meta span {
+    padding: 5px 10px;
+    background-color: var(--feature-card-bg);
+    border-radius: 4px;
+    font-size: 0.9rem;
+    color: var(--card-meta-text);
+}
+
+/* 数据记录页面样式 - 执行器信息 */
+.actuator-info {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: var(--card-meta-bg);
+    border-radius: 8px;
+    box-shadow: 0 1px 3px var(--shadow-color);
+}
+
+.actuator-info h2 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+    color: var(--card-header-text);
+}
+
+.actuator-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.actuator-meta span {
+    padding: 5px 10px;
+    background-color: var(--feature-card-bg);
+    border-radius: 4px;
+    font-size: 0.9rem;
+    color: var(--card-meta-text);
+}
+
+/* 数据类型选项卡 */
+.data-type-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.tab-button {
+    padding: 10px 20px;
+    margin-right: 5px;
+    background-color: var(--card-meta-bg);
+    border: 1px solid var(--border-color);
+    border-bottom: none;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    color: var(--text-color);
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+.tab-button:hover {
+    background-color: var(--feature-card-bg);
+    text-decoration: none;
+}
+
+.tab-button.active {
+    background-color: var(--card-bg);
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--primary-color);
+    font-weight: bold;
+}
+
+.tab-button i {
+    margin-right: 5px;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .sensor-meta,
+    .actuator-meta {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .data-type-tabs {
+        flex-direction: column;
+        border-bottom: none;
+    }
+    
+    .tab-button {
+        margin-right: 0;
+        margin-bottom: 5px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+    }
+}
+
+/* 分页组件样式 */
+.pagination-container {
+    margin-top: 20px;
+    background-color: var(--card-meta-bg);
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 1px 3px var(--shadow-color);
+}
+
+.pagination-info {
+    text-align: center;
+    color: var(--card-meta-text);
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    margin: 0;
+}
+
+.pagination-numbers {
+    display: flex;
+    gap: 5px;
+}
+
+.pagination-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    height: 34px;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.pagination-button:hover {
+    background-color: var(--feature-card-bg);
+    color: var(--secondary-color);
+    text-decoration: none;
+}
+
+.pagination-button.current {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #fff;
+    font-weight: bold;
+}
+
+.pagination-button.disabled {
+    color: var(--card-meta-text);
+    pointer-events: none;
+    background-color: var(--card-meta-bg);
+    border-color: var(--border-color);
+    opacity: 0.6;
+}
+
+.pagination-end {
+    color: var(--text-color);
+}
+
+/* 响应式调整 - 分页 */
+@media (max-width: 768px) {
+    .pagination-container {
+        padding: 10px;
+    }
+    
+    .pagination {
+        flex-wrap: wrap;
+    }
+    
+    .pagination-numbers {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+        margin-top: 10px;
+    }
+}
+
+/* 策略信息样式 */
+.strategy-info {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: var(--card-meta-bg);
+    border-radius: 8px;
+    box-shadow: 0 1px 3px var(--shadow-color);
+}
+
+.strategy-info h2 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+    color: var(--card-header-text);
+}
+
+.strategy-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+/* 策略网格样式 */
+.strategy-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/* 设备网格样式 */
+.device-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/* 设备卡片状态徽章 */
+.device-card .device-status {
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.device-card .status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.device-card .status-badge.status-online {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.device-card .status-badge.status-offline {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.device-card .status-badge.status-unregistered {
+    background-color: #e2e3e5;
+    color: #383d41;
+}
+
+body.dark-mode .device-card .status-badge.status-online {
+    background-color: #1b4739;
+    color: #7cf0b0;
+}
+
+body.dark-mode .device-card .status-badge.status-offline {
+    background-color: #492c30;
+    color: #f5a8ae;
+}
+
+body.dark-mode .device-card .status-badge.status-unregistered {
+    background-color: #31343a;
+    color: #b9bdc0;
+}
+
+.device-card .status-badge i {
+    margin-right: 5px;
+}
+
+/* 设备元数据 */
+.device-card .device-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+/* 项目元数据 */
+.project-card .project-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+/* 卡片组按钮 */
+.btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.btn-group .btn {
+    flex: 1;
+    text-align: center;
+    padding: 6px 8px;
+    font-size: 0.9rem;
+}
+
+/* 媒体查询 */
+@media (max-width: 992px) {
+    .strategy-card,
+    .project-card,
+    .device-card {
+        flex: 0 0 calc(50% - 10px);
+        width: calc(50% - 10px);
+    }
+}
+
+@media (max-width: 768px) {
+    .strategy-card,
+    .project-card,
+    .device-card {
+        flex: 0 0 100%;
+        width: 100%;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+    }
+}
+
+/* 策略状态切换 */
+.status-toggle {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* 无数据图标 */
+.no-data-icon {
+    font-size: 3rem;
+    color: #ccc;
+    margin-bottom: 1rem;
+    text-align: center;
 } 
