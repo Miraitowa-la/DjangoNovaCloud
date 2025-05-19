@@ -1,0 +1,894 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - NovaCloud{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+    .permissions-container {
+        margin-top: 20px;
+    }
+    
+    .app-section {
+        margin-bottom: 30px;
+        background-color: var(--card-bg);
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 2px 5px var(--shadow-color);
+        transition: all 0.3s ease;
+    }
+    
+    .app-section:hover {
+        box-shadow: 0 4px 8px var(--shadow-color);
+    }
+    
+    .app-section h3 {
+        font-size: 1.4rem;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-color);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+    }
+    
+    .app-section:hover {
+        color: var(--primary-color);
+    }
+    
+    .app-section h3 .toggle-icon {
+        transition: transform 0.3s ease;
+    }
+    
+    .model-section {
+        margin-bottom: 20px;
+        background-color: var(--feature-card-bg);
+        border-radius: 6px;
+        padding: 10px 15px;
+        transition: all 0.3s ease;
+        border-left: 3px solid transparent;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .model-section h4 {
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+        color: var(--secondary-color);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .permission-group {
+        display: flex;
+        flex-wrap: wrap;
+        margin: 0 -5px;
+    }
+    
+    .permission-item {
+        flex: 0 0 25%;
+        padding: 0 5px;
+        margin-bottom: 8px;
+        box-sizing: border-box;
+    }
+    
+    .permission-item label {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        cursor: pointer;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding: 5px 8px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+        position: relative;
+    }
+    
+    .permission-item label:hover {
+        background-color: var(--feature-card-bg);
+        border-color: var(--border-color);
+    }
+    
+    .permission-item label.clicked {
+        background-color: rgba(52, 152, 219, 0.15);
+        transform: scale(0.98);
+    }
+    
+    /* 自定义复选框样式 */
+    .permission-item input[type="checkbox"],
+    .app-checkbox input[type="checkbox"],
+    .model-checkbox input[type="checkbox"] {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 18px;
+        height: 18px;
+        border: 2px solid var(--border-color);
+        border-radius: 3px;
+        margin-right: 8px;
+        position: relative;
+        cursor: pointer;
+        background-color: var(--input-bg);
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+    }
+    
+    .permission-item input[type="checkbox"]:checked,
+    .app-checkbox input[type="checkbox"]:checked,
+    .model-checkbox input[type="checkbox"]:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+    
+    .permission-item input[type="checkbox"]:checked::after,
+    .app-checkbox input[type="checkbox"]:checked::after,
+    .model-checkbox input[type="checkbox"]:checked::after {
+        content: '✓';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 12px;
+        line-height: 1;
+    }
+    
+    .permission-item input[type="checkbox"]:indeterminate,
+    .app-checkbox input[type="checkbox"]:indeterminate,
+    .model-checkbox input[type="checkbox"]:indeterminate {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+    
+    .permission-item input[type="checkbox"]:indeterminate::after,
+    .app-checkbox input[type="checkbox"]:indeterminate::after,
+    .model-checkbox input[type="checkbox"]:indeterminate::after {
+        content: '-';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 12px;
+        font-weight: bold;
+        line-height: 1;
+    }
+    
+    .toggle-section {
+        margin-bottom: 10px;
+        display: flex;
+        flex-wrap: wrap;
+    }
+    
+    .toggle-btn {
+        background: none;
+        border: 1px solid transparent;
+        color: var(--primary-color);
+        cursor: pointer;
+        padding: 5px 10px;
+        margin-right: 15px;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+    }
+    
+    .toggle-btn:hover {
+        background-color: rgba(52, 152, 219, 0.1);
+        border-color: var(--border-color);
+    }
+    
+    .toggle-btn:active {
+        transform: scale(0.98);
+    }
+    
+    .panel-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    
+    .panel-title h3 {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+    
+    .permission-count {
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 12px;
+        padding: 2px 8px;
+        font-size: 0.8rem;
+        margin-left: 8px;
+        white-space: nowrap;
+    }
+    
+    .form-actions {
+        margin-top: 25px;
+    }
+    
+    .form-actions .button-group {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+    }
+    
+    .form-actions .button-group .btn {
+        flex: 1;
+        text-align: center;
+        padding: 10px 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-actions .button-group .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+    
+    .form-actions .button-group .btn-primary:hover {
+        background-color: var(--secondary-color);
+        border-color: var(--secondary-color);
+    }
+    
+    .app-checkbox, 
+    .model-checkbox {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        flex: 1;
+        user-select: none;
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="admin-content-header">
+    <h1>{{ title }}</h1>
+    <p>{% if role %}编辑现有角色和管理权限{% else %}创建新角色并分配权限{% endif %}</p>
+</div>
+
+<div class="admin-box">
+    <div class="admin-box-title">
+        <h2>角色信息</h2>
+    </div>
+    
+    <div class="admin-box-content">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+                {{ form.name }}
+                {% if form.name.help_text %}
+                    <small class="form-text text-muted">{{ form.name.help_text }}</small>
+                {% endif %}
+                {% if form.name.errors %}
+                    <div class="field-error">{{ form.name.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+                {{ form.description }}
+                {% if form.description.help_text %}
+                    <small class="form-text text-muted">{{ form.description.help_text }}</small>
+                {% endif %}
+                {% if form.description.errors %}
+                    <div class="field-error">{{ form.description.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="permissions-container">
+                <div class="panel-title">
+                    <h3>角色权限</h3>
+                    <div class="toggle-section">
+                        <button type="button" id="expand-all" class="toggle-btn">
+                            <i class="fas fa-plus-square"></i> 展开全部
+                        </button>
+                        <button type="button" id="collapse-all" class="toggle-btn">
+                            <i class="fas fa-minus-square"></i> 收起全部
+                        </button>
+                        <button type="button" id="select-all" class="toggle-btn">
+                            <i class="fas fa-check-square"></i> 全选
+                        </button>
+                        <button type="button" id="deselect-all" class="toggle-btn">
+                            <i class="fas fa-square"></i> 取消全选
+                        </button>
+                    </div>
+                </div>
+
+                {% if form.permissions.errors %}
+                    <div class="field-error">{{ form.permissions.errors }}</div>
+                {% endif %}
+                
+                {% if permissions_by_app %}
+                    <!-- 按应用分组的权限列表 -->
+                    {% for app_label, app_models in permissions_by_app.items %}
+                        <div class="app-section" id="app-{{ app_label }}">
+                            <h3>
+                                <label class="app-checkbox">
+                                    <input type="checkbox" class="app-toggle" data-app="{{ app_label }}">
+                                    {{ app_label|title }} 应用
+                                </label>
+                                <span class="permission-count" id="app-{{ app_label }}-count">0</span>
+                            </h3>
+                            {% for model_name, model_permissions in app_models.items %}
+                                <div class="model-section" id="model-{{ app_label }}-{{ model_name }}">
+                                    <h4>
+                                        <label class="model-checkbox">
+                                            <input type="checkbox" class="model-toggle" data-app="{{ app_label }}" data-model="{{ model_name }}">
+                                            {{ model_name|title }}
+                                        </label>
+                                        <span class="permission-count" id="model-{{ app_label }}-{{ model_name }}-count">0</span>
+                                    </h4>
+                                    <div class="permission-group">
+                                        {% for permission in model_permissions %}
+                                            <div class="permission-item">
+                                                <label for="id_permissions_{{ permission.id }}">
+                                                    <input type="checkbox" name="permissions" 
+                                                        value="{{ permission.id }}" 
+                                                        id="id_permissions_{{ permission.id }}"
+                                                        class="permission-checkbox"
+                                                        data-app="{{ app_label }}"
+                                                        data-model="{{ model_name }}"
+                                                        {% if role and permission in role.permissions.all %}checked{% endif %}>
+                                                    {{ permission.name }}
+                                                </label>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>没有可用的权限。</p>
+                {% endif %}
+            </div>
+            
+            <div class="form-actions">
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> 保存角色
+                    </button>
+                    <a href="{% url 'admin_panel:role_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> 取消
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 应用名称翻译映射表（英文 -> 中文）
+        const appTranslations = {
+            "admin": "系统管理",
+            "admin_panel": "管理面板",
+            "accounts": "用户账户",
+            "auth": "认证系统",
+            "contenttypes": "内容类型",
+            "core": "核心功能",
+            "iot_devices": "物联网设备",
+            "mqtt_client": "MQTT客户端",
+            "sessions": "会话管理",
+            "strategy_engine": "策略引擎",
+            "tcp_server": "TCP服务器"
+        };
+        
+        // 模型名称翻译映射表（英文 -> 中文）
+        const modelTranslations = {
+            // admin应用
+            "logentry": "日志条目",
+            
+            // admin_panel应用
+            "role": "角色",
+            "auditlog": "审计日志",
+            
+            // accounts应用
+            "userprofile": "用户资料",
+            
+            // auth应用
+            "permission": "权限",
+            "group": "用户组",
+            "user": "用户",
+            
+            // contenttypes应用
+            "contenttype": "内容类型",
+            
+            // sessions应用
+            "session": "会话",
+            
+            // iot_devices应用
+            "project": "项目",
+            "device": "设备",
+            "sensor": "传感器",
+            "actuator": "执行器",
+            "sensordata": "传感器数据",
+            "actuatordata": "执行器数据",
+            "actuatorcommand": "执行器命令",
+            
+            // strategy_engine应用
+            "strategy": "策略",
+            "condition": "条件",
+            "action": "动作",
+            "executionlog": "执行日志",
+            "strategylog": "策略日志"
+        };
+
+        // 权限名称映射（英文 -> 中文）
+        const permissionTranslations = {
+            // 通用权限
+            "Can add": "可添加",
+            "Can change": "可修改",
+            "Can delete": "可删除",
+            "Can view": "可查看",
+            
+            // 模型名称翻译 (用于权限描述中)
+            "log entry": "日志条目",
+            "permission": "权限",
+            "group": "用户组",
+            "user": "用户",
+            "content type": "内容类型",
+            "session": "会话",
+            "role": "角色",
+            "audit log": "审计日志",
+            "project": "项目",
+            "device": "设备",
+            "sensor": "传感器",
+            "actuator": "执行器",
+            "sensor data": "传感器数据",
+            "actuator data": "执行器数据",
+            "actuator command": "执行器命令",
+            "strategy": "策略",
+            "condition": "条件",
+            "action": "动作",
+            "execution log": "执行日志",
+            "user profile": "用户资料",
+            
+            // 特殊权限
+            "Can manage users": "可管理用户",
+            "Can reset password": "可重置密码",
+            "Can control actuator": "可控制执行器",
+            "Can execute strategy": "可执行策略"
+        };
+        
+        // 默认折叠所有模型区域
+        function initializeFoldingState() {
+            const modelSections = document.querySelectorAll('.model-section');
+            modelSections.forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // 为应用标题添加展开/折叠图标
+            document.querySelectorAll('.app-section h3').forEach(header => {
+                const icon = document.createElement('i');
+                icon.className = 'fas fa-chevron-down toggle-icon';
+                icon.style.marginLeft = '10px';
+                icon.style.fontSize = '0.8em';
+                icon.style.cursor = 'pointer';
+                icon.style.opacity = '0.7';
+                
+                // 将图标插入到权限计数之前
+                const permCount = header.querySelector('.permission-count');
+                header.insertBefore(icon, permCount);
+                
+                // 添加点击事件
+                header.addEventListener('click', function(e) {
+                    // 确保不影响复选框的点击事件
+                    if (e.target.type === 'checkbox') return;
+                    
+                    const appSection = this.closest('.app-section');
+                    const modelSections = appSection.querySelectorAll('.model-section');
+                    const icon = this.querySelector('.toggle-icon');
+                    
+                    // 判断当前状态
+                    const firstModel = modelSections[0];
+                    const isCollapsed = firstModel.style.display === 'none';
+                    
+                    // 切换显示状态
+                    modelSections.forEach(section => {
+                        section.style.display = isCollapsed ? 'block' : 'none';
+                    });
+                    
+                    // 切换图标
+                    icon.className = isCollapsed ? 'fas fa-chevron-up toggle-icon' : 'fas fa-chevron-down toggle-icon';
+                });
+            });
+        }
+        
+        // 翻译应用标题
+        document.querySelectorAll('.app-section h3 label').forEach(label => {
+            const appNameText = label.textContent.trim().replace(' 应用', '');
+            
+            // 获取应用名称（去掉'应用'文本和空格）
+            const appName = appNameText.trim().toLowerCase();
+            
+            // 检查是否有对应的翻译
+            if (appTranslations[appName]) {
+                // 替换应用名称文本
+                const checkbox = label.querySelector('input[type="checkbox"]');
+                label.textContent = '';
+                label.appendChild(checkbox);
+                label.appendChild(document.createTextNode(' ' + appTranslations[appName] + ' 应用'));
+            }
+        });
+        
+        // 翻译模型标题
+        document.querySelectorAll('.model-section h4 label').forEach(label => {
+            const modelNameText = label.textContent.trim();
+            
+            // 获取模型名称（去掉空格并转小写）
+            const modelName = modelNameText.trim().toLowerCase().replace(/\s+/g, '');
+            
+            // 检查是否有对应的翻译
+            if (modelTranslations[modelName]) {
+                // 替换模型名称文本
+                const checkbox = label.querySelector('input[type="checkbox"]');
+                label.textContent = '';
+                label.appendChild(checkbox);
+                label.appendChild(document.createTextNode(' ' + modelTranslations[modelName]));
+            }
+        });
+        
+        // 翻译权限名称函数
+        function translatePermission(permissionText) {
+            let translatedText = permissionText;
+            
+            for (const [english, chinese] of Object.entries(permissionTranslations)) {
+                translatedText = translatedText.replace(new RegExp(english, 'gi'), chinese);
+            }
+            
+            return translatedText;
+        }
+        
+        // 翻译所有权限名称
+        document.querySelectorAll('.permission-item label').forEach(label => {
+            const originalText = label.textContent.trim();
+            const translatedText = translatePermission(originalText);
+            
+            // 保留复选框，替换文本部分
+            const checkbox = label.querySelector('input[type="checkbox"]');
+            label.textContent = '';
+            label.appendChild(checkbox);
+            label.appendChild(document.createTextNode(' ' + translatedText));
+        });
+        
+        // 重新组织权限布局，使每行的权限均匀分布
+        function reorganizePermissions() {
+            // 获取所有权限组
+            const permissionGroups = document.querySelectorAll('.permission-group');
+            
+            permissionGroups.forEach(group => {
+                // 获取权限项
+                const allPermissionItems = Array.from(group.querySelectorAll('.permission-item'));
+                
+                // 尝试将权限按类型分组
+                const addPermission = allPermissionItems.find(item => item.textContent.includes('可添加'));
+                const changePermission = allPermissionItems.find(item => item.textContent.includes('可修改'));
+                const deletePermission = allPermissionItems.find(item => item.textContent.includes('可删除'));
+                const viewPermission = allPermissionItems.find(item => item.textContent.includes('可查看'));
+                
+                // 收集标准权限
+                const standardPermissions = [addPermission, changePermission, deletePermission, viewPermission].filter(Boolean);
+                
+                // 收集其他权限（非标准的四种权限）
+                const otherPermissions = allPermissionItems.filter(item => {
+                    return !item.textContent.includes('可添加') && 
+                           !item.textContent.includes('可修改') && 
+                           !item.textContent.includes('可删除') && 
+                           !item.textContent.includes('可查看');
+                });
+                
+                // 清空原有的权限组
+                group.innerHTML = '';
+                
+                // 首先添加标准权限（可添加、可修改、可删除、可查看）
+                standardPermissions.forEach(item => {
+                    if (item) {
+                        group.appendChild(item);
+                    }
+                });
+                
+                // 如果有空位（标准权限不足4个），添加填充元素保持布局
+                const missingCount = 4 - standardPermissions.length;
+                if (missingCount > 0 && standardPermissions.length > 0) {
+                    for (let i = 0; i < missingCount; i++) {
+                        const spacer = document.createElement('div');
+                        spacer.className = 'permission-item';
+                        spacer.style.visibility = 'hidden';
+                        group.appendChild(spacer);
+                    }
+                }
+                
+                // 然后为其他权限创建新行
+                if (otherPermissions.length > 0) {
+                    // 添加到原权限组中
+                    otherPermissions.forEach(item => {
+                        group.appendChild(item);
+                    });
+                    
+                    // 添加填充元素使新行的权限也均匀分布
+                    const extraSpacersNeeded = 4 - (otherPermissions.length % 4);
+                    if (extraSpacersNeeded > 0 && extraSpacersNeeded < 4) {
+                        for (let i = 0; i < extraSpacersNeeded; i++) {
+                            const spacer = document.createElement('div');
+                            spacer.className = 'permission-item';
+                            spacer.style.visibility = 'hidden';
+                            group.appendChild(spacer);
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 在翻译完成后重新组织权限
+        reorganizePermissions();
+        
+        // 增强复选框交互效果
+        function enhanceCheckboxInteraction() {
+            // 为所有权限项添加点击效果
+            document.querySelectorAll('.permission-item label').forEach(label => {
+                label.addEventListener('click', function(e) {
+                    // 防止事件冒泡和默认行为
+                    e.stopPropagation();
+                    
+                    // 获取复选框
+                    const checkbox = this.querySelector('input[type="checkbox"]');
+                    
+                    // 添加点击动画效果
+                    this.classList.add('clicked');
+                    setTimeout(() => {
+                        this.classList.remove('clicked');
+                    }, 200);
+                });
+            });
+        }
+        
+        // 展开/收起所有应用权限
+        document.getElementById('expand-all').addEventListener('click', function() {
+            const sections = document.querySelectorAll('.model-section');
+            sections.forEach(section => {
+                section.style.display = 'block';
+            });
+            
+            // 更新所有展开/折叠图标
+            document.querySelectorAll('.app-section h3 .toggle-icon').forEach(icon => {
+                icon.className = 'fas fa-chevron-up toggle-icon';
+            });
+        });
+        
+        document.getElementById('collapse-all').addEventListener('click', function() {
+            const sections = document.querySelectorAll('.model-section');
+            sections.forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // 更新所有展开/折叠图标
+            document.querySelectorAll('.app-section h3 .toggle-icon').forEach(icon => {
+                icon.className = 'fas fa-chevron-down toggle-icon';
+            });
+        });
+        
+        // 全选/取消全选
+        document.getElementById('select-all').addEventListener('click', function() {
+            const checkboxes = document.querySelectorAll('input[name="permissions"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = true;
+            });
+            updateAllToggleStates();
+            updatePermissionCounts();
+        });
+        
+        document.getElementById('deselect-all').addEventListener('click', function() {
+            const checkboxes = document.querySelectorAll('input[name="permissions"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            updateAllToggleStates();
+            updatePermissionCounts();
+        });
+        
+        // 应用级别复选框事件
+        document.querySelectorAll('.app-toggle').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const app = this.dataset.app;
+                const isChecked = this.checked;
+                
+                // 设置所有该应用下的模型复选框
+                document.querySelectorAll(`.model-toggle[data-app="${app}"]`).forEach(modelCheckbox => {
+                    modelCheckbox.checked = isChecked;
+                    
+                    // 触发模型复选框的change事件
+                    const event = new Event('change');
+                    modelCheckbox.dispatchEvent(event);
+                });
+                
+                // 直接设置所有该应用下的权限复选框
+                document.querySelectorAll(`input.permission-checkbox[data-app="${app}"]`).forEach(permCheckbox => {
+                    permCheckbox.checked = isChecked;
+                });
+                
+                updatePermissionCounts();
+            });
+        });
+        
+        // 模型级别复选框事件
+        document.querySelectorAll('.model-toggle').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const app = this.dataset.app;
+                const model = this.dataset.model;
+                const isChecked = this.checked;
+                
+                // 设置所有该模型下的权限复选框
+                document.querySelectorAll(`input.permission-checkbox[data-app="${app}"][data-model="${model}"]`).forEach(permCheckbox => {
+                    permCheckbox.checked = isChecked;
+                });
+                
+                // 检查是否需要更新应用级别复选框
+                updateAppToggleState(app);
+                
+                updatePermissionCounts();
+            });
+        });
+        
+        // 单个权限复选框事件
+        document.querySelectorAll('.permission-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const app = this.dataset.app;
+                const model = this.dataset.model;
+                
+                // 更新模型级别复选框
+                updateModelToggleState(app, model);
+                
+                // 更新应用级别复选框
+                updateAppToggleState(app);
+                
+                updatePermissionCounts();
+            });
+        });
+        
+        // 更新应用级别复选框状态
+        function updateAppToggleState(app) {
+            const appToggle = document.querySelector(`.app-toggle[data-app="${app}"]`);
+            const modelToggles = document.querySelectorAll(`.model-toggle[data-app="${app}"]`);
+            const allChecked = Array.from(modelToggles).every(toggle => toggle.checked);
+            const allUnchecked = Array.from(modelToggles).every(toggle => !toggle.checked);
+            
+            if (allChecked) {
+                appToggle.checked = true;
+                appToggle.indeterminate = false;
+            } else if (allUnchecked) {
+                appToggle.checked = false;
+                appToggle.indeterminate = false;
+            } else {
+                appToggle.checked = false;
+                appToggle.indeterminate = true;
+            }
+        }
+        
+        // 更新模型级别复选框状态
+        function updateModelToggleState(app, model) {
+            const modelToggle = document.querySelector(`.model-toggle[data-app="${app}"][data-model="${model}"]`);
+            const permCheckboxes = document.querySelectorAll(`input.permission-checkbox[data-app="${app}"][data-model="${model}"]`);
+            const allChecked = Array.from(permCheckboxes).every(checkbox => checkbox.checked);
+            const allUnchecked = Array.from(permCheckboxes).every(checkbox => !checkbox.checked);
+            
+            if (allChecked) {
+                modelToggle.checked = true;
+                modelToggle.indeterminate = false;
+            } else if (allUnchecked) {
+                modelToggle.checked = false;
+                modelToggle.indeterminate = false;
+            } else {
+                modelToggle.checked = false;
+                modelToggle.indeterminate = true;
+            }
+        }
+        
+        // 更新所有切换状态
+        function updateAllToggleStates() {
+            // 获取所有的应用标识
+            const apps = new Set();
+            document.querySelectorAll('.app-toggle').forEach(toggle => {
+                apps.add(toggle.dataset.app);
+            });
+            
+            // 对每个应用进行处理
+            apps.forEach(app => {
+                // 获取该应用的所有模型
+                const models = new Set();
+                document.querySelectorAll(`.model-toggle[data-app="${app}"]`).forEach(toggle => {
+                    models.add(toggle.dataset.model);
+                });
+                
+                // 对每个模型更新状态
+                models.forEach(model => {
+                    updateModelToggleState(app, model);
+                });
+                
+                // 更新应用状态
+                updateAppToggleState(app);
+            });
+        }
+        
+        // 更新权限计数
+        function updatePermissionCounts() {
+            // 更新模型权限计数
+            const appModels = {};
+            
+            document.querySelectorAll('input[name="permissions"]').forEach(checkbox => {
+                const app = checkbox.dataset.app;
+                const model = checkbox.dataset.model;
+                
+                if (!appModels[app]) {
+                    appModels[app] = {};
+                }
+                
+                if (!appModels[app][model]) {
+                    appModels[app][model] = {
+                        total: 0,
+                        checked: 0
+                    };
+                }
+                
+                appModels[app][model].total++;
+                
+                if (checkbox.checked) {
+                    appModels[app][model].checked++;
+                }
+            });
+            
+            // 更新界面计数
+            for (const app in appModels) {
+                let appChecked = 0;
+                let appTotal = 0;
+                
+                for (const model in appModels[app]) {
+                    const modelStats = appModels[app][model];
+                    appChecked += modelStats.checked;
+                    appTotal += modelStats.total;
+                    
+                    const modelCountElement = document.getElementById(`model-${app}-${model}-count`);
+                    if (modelCountElement) {
+                        modelCountElement.textContent = `${modelStats.checked}/${modelStats.total}`;
+                    }
+                }
+                
+                const appCountElement = document.getElementById(`app-${app}-count`);
+                if (appCountElement) {
+                    appCountElement.textContent = `${appChecked}/${appTotal}`;
+                }
+            }
+        }
+        
+        // 初始化切换状态
+        updateAllToggleStates();
+        
+        // 初始化计数
+        updatePermissionCounts();
+    });
+</script>
+{% endblock %} 

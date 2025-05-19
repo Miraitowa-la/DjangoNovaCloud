@@ -379,12 +379,15 @@
                     <i class="fas fa-history"></i> 审计日志
                 </a>
             </li>
-            <!-- 后续可添加其他管理功能 -->
+            <!-- 角色管理 - 仅对超级管理员可见 -->
+            {% if request.user.is_superuser %}
             <li>
-                <a href="#" class="disabled">
+                <a href="{% url 'admin_panel:role_list' %}" {% if request.resolver_match.url_name == 'role_list' or request.resolver_match.url_name == 'role_create' or request.resolver_match.url_name == 'role_edit' or request.resolver_match.url_name == 'role_delete' %}class="active"{% endif %}>
                     <i class="fas fa-user-shield"></i> 角色管理
                 </a>
             </li>
+            {% endif %}
+            <!-- 其他管理功能 -->
             <li>
                 <a href="#" class="disabled">
                     <i class="fas fa-chart-line"></i> 系统监控

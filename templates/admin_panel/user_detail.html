@@ -113,16 +113,43 @@
             
             <div class="role-info">
                 {% if user_obj.profile.role %}
-                    <div class="role-name mb-2">
-                        <span class="badge bg-primary" style="font-size: 1rem;">{{ user_obj.profile.role.name }}</span>
-                    </div>
-                    <div class="role-description">
-                        <p>{{ user_obj.profile.role.description|default:"无描述" }}</p>
+                    <div class="role-card">
+                        <div class="role-header">
+                            <div class="role-name">
+                                <i class="fas fa-user-tag"></i>
+                                <span>{{ user_obj.profile.role.name }}</span>
+                            </div>
+                            <div class="role-badge">
+                                <span class="permission-count">{{ user_obj.profile.role.permissions.count }} 项权限</span>
+                            </div>
+                        </div>
+                        
+                        {% if user_obj.profile.role.description %}
+                        <div class="role-description">
+                            {{ user_obj.profile.role.description }}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="role-actions">
+                            <a href="{% url 'admin_panel:role_edit' user_obj.profile.role.id %}" class="role-action-btn">
+                                <i class="fas fa-edit"></i> 查看/编辑角色
+                            </a>
+                        </div>
                     </div>
                 {% else %}
-                    <div class="empty-state text-center py-3">
-                        <i class="fas fa-user-tag fa-2x text-muted mb-3"></i>
-                        <p>未分配角色</p>
+                    <div class="empty-role-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <div class="empty-text">
+                            <p>未分配角色</p>
+                            <small>该用户尚未分配任何系统角色</small>
+                        </div>
+                        <div class="empty-action">
+                            <a href="{% url 'admin_panel:user_update' user_obj.id %}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-plus-circle"></i> 分配角色
+                            </a>
+                        </div>
                     </div>
                 {% endif %}
             </div>
@@ -176,6 +203,128 @@
         display: flex;
         align-items: center;
         justify-content: center;
+    }
+    
+    /* 角色信息样式 */
+    .role-card {
+        background-color: var(--feature-card-bg);
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 2px 4px var(--shadow-color);
+        transition: all 0.3s ease;
+    }
+    
+    .role-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px var(--shadow-color);
+    }
+    
+    .role-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+    
+    .role-name {
+        display: flex;
+        align-items: center;
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: var(--primary-color);
+    }
+    
+    .role-name i {
+        margin-right: 8px;
+        font-size: 1rem;
+    }
+    
+    .role-badge {
+        display: flex;
+        align-items: center;
+    }
+    
+    .permission-count {
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 12px;
+        padding: 2px 10px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+    }
+    
+    .role-description {
+        color: var(--text-color);
+        margin-bottom: 15px;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .role-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 10px;
+    }
+    
+    .role-action-btn {
+        display: inline-flex;
+        align-items: center;
+        color: var(--primary-color);
+        text-decoration: none;
+        font-size: 0.9rem;
+        padding: 5px 10px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+    }
+    
+    .role-action-btn:hover {
+        background-color: rgba(52, 152, 219, 0.1);
+        color: var(--secondary-color);
+    }
+    
+    .role-action-btn i {
+        margin-right: 5px;
+    }
+    
+    /* 空状态样式 */
+    .empty-role-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px 15px;
+        text-align: center;
+        background-color: var(--feature-card-bg);
+        border-radius: 8px;
+        border: 1px dashed var(--border-color);
+    }
+    
+    .empty-icon {
+        font-size: 2rem;
+        color: var(--border-color);
+        margin-bottom: 10px;
+    }
+    
+    .empty-text p {
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: var(--text-color);
+    }
+    
+    .empty-text small {
+        display: block;
+        color: var(--text-secondary);
+        margin-bottom: 15px;
+    }
+    
+    .empty-action .btn {
+        transition: all 0.3s ease;
+    }
+    
+    .empty-action .btn:hover {
+        transform: translateY(-2px);
     }
     
     @media (max-width: 768px) {

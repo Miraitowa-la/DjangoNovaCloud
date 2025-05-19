@@ -21,4 +21,10 @@ urlpatterns = [
     
     # 新增：审计日志
     path('audit-logs/', views.AuditLogListView.as_view(), name='audit_log_list'),
+    
+    # 角色管理
+    path('roles/', views.RoleListView.as_view(), name='role_list'),
+    path('roles/create/', views.RoleCreateView.as_view(), name='role_create'),
+    path('roles/<int:pk>/edit/', views.RoleUpdateView.as_view(), name='role_edit'),
+    path('roles/<int:pk>/delete/', views.RoleDeleteView.as_view(), name='role_delete'),
 ] 

@@ -1,10 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView, View, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Permission
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse, HttpResponseForbidden
@@ -13,7 +13,7 @@ from datetime import timedelta
 
 from accounts.models import UserProfile
 from admin_panel.models import Role, AuditLog
-from admin_panel.forms import UserCreateForm, UserEditForm
+from admin_panel.forms import UserCreateForm, UserEditForm, RoleForm
 from .utils import get_subordinate_user_ids, get_user_and_subordinates_queryset, create_audit_log
 from iot_devices.models import Project
 
@@ -439,3 +439,140 @@ class UserHierarchyView(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
         }
         
         return node
+
+# 超级管理员检查混入类
+class SuperuserRequiredMixin(UserPassesTestMixin):
+    def test_func(self):
+        return self.request.user.is_superuser
+
+# 角色列表视图
+class RoleListView(LoginRequiredMixin, SuperuserRequiredMixin, ListView):
+    """角色列表视图，仅限超级管理员访问"""
+    model = Role
+    template_name = 'admin_panel/roles/role_list.html'
+    context_object_name = 'roles'
+    
+    def get_queryset(self):
+        # 获取每个角色关联的用户数量
+        return Role.objects.annotate(user_count=Count('users')).order_by('name')
+
+# 角色创建视图
+class RoleCreateView(LoginRequiredMixin, SuperuserRequiredMixin, CreateView):
+    """角色创建视图，仅限超级管理员访问"""
+    model = Role
+    form_class = RoleForm
+    template_name = 'admin_panel/roles/role_form.html'
+    success_url = reverse_lazy('admin_panel:role_list')
+    
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        
+        # 记录审计日志
+        create_audit_log(
+            user=self.request.user,
+            action=AuditLog.ACTION_ROLE_CREATE,
+            target_object=self.object,
+            details=f"创建角色 {self.object.name}",
+            request=self.request
+        )
+        
+        messages.success(self.request, f'角色 {self.object.name} 创建成功！')
+        return response
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = '创建角色'
+        # 将分组的权限传递给模板
+        context['permissions_by_app'] = self.form_class().grouped_permissions
+        return context
+
+# 角色更新视图
+class RoleUpdateView(LoginRequiredMixin, SuperuserRequiredMixin, UpdateView):
+    """角色编辑视图，仅限超级管理员访问"""
+    model = Role
+    form_class = RoleForm
+    template_name = 'admin_panel/roles/role_form.html'
+    context_object_name = 'role'
+    success_url = reverse_lazy('admin_panel:role_list')
+    
+    def form_valid(self, form):
+        # 获取修改前的权限列表
+        old_permissions = list(self.get_object().permissions.values_list('id', flat=True))
+        
+        response = super().form_valid(form)
+        
+        # 获取修改后的权限列表
+        new_permissions = list(self.object.permissions.values_list('id', flat=True))
+        
+        # 如果权限有变化，记录在审计日志中
+        if set(old_permissions) != set(new_permissions):
+            added = len(set(new_permissions) - set(old_permissions))
+            removed = len(set(old_permissions) - set(new_permissions))
+            
+            permission_changes = []
+            if added > 0:
+                permission_changes.append(f"添加了 {added} 个权限")
+            if removed > 0:
+                permission_changes.append(f"移除了 {removed} 个权限")
+                
+            permission_change_text = "，".join(permission_changes)
+            details = f"更新角色 {self.object.name}：{permission_change_text}"
+        else:
+            details = f"更新角色 {self.object.name}"
+        
+        # 记录审计日志
+        create_audit_log(
+            user=self.request.user,
+            action=AuditLog.ACTION_ROLE_UPDATE,
+            target_object=self.object,
+            details=details,
+            request=self.request
+        )
+        
+        messages.success(self.request, f'角色 {self.object.name} 更新成功！')
+        return response
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = '编辑角色'
+        # 将分组的权限传递给模板
+        context['permissions_by_app'] = self.get_form().grouped_permissions
+        return context
+
+# 角色删除视图
+class RoleDeleteView(LoginRequiredMixin, SuperuserRequiredMixin, DeleteView):
+    """角色删除视图，仅限超级管理员访问"""
+    model = Role
+    template_name = 'admin_panel/roles/role_confirm_delete.html'
+    context_object_name = 'role'
+    success_url = reverse_lazy('admin_panel:role_list')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # 获取使用此角色的用户数量
+        context['user_count'] = UserProfile.objects.filter(role=self.object).count()
+        return context
+    
+    def post(self, request, *args, **kwargs):
+        role = self.get_object()
+        # 检查是否有用户使用此角色
+        if UserProfile.objects.filter(role=role).exists():
+            messages.error(request, f'无法删除角色 {role.name}，仍有用户使用此角色。')
+            return redirect('admin_panel:role_list')
+        
+        # 记录角色名称供日志使用
+        role_name = role.name
+        
+        # 调用父类的delete方法删除角色
+        response = super().post(request, *args, **kwargs)
+        
+        # 记录审计日志
+        create_audit_log(
+            user=request.user,
+            action=AuditLog.ACTION_ROLE_DELETE,
+            details=f"删除角色 {role_name}",
+            request=request
+        )
+        
+        messages.success(request, f'角色 {role_name} 已删除！')
+        return response

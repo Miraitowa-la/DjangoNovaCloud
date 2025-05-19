@@ -21,7 +21,8 @@ class Role(models.Model):
     permissions = models.ManyToManyField(
         Permission, 
         blank=True, 
-        verbose_name="权限"
+        verbose_name="权限",
+        related_name="roles"
     )
     
     class Meta:
@@ -47,6 +48,11 @@ class AuditLog(models.Model):
     ACTION_USER_LOGIN = 'user_login'
     ACTION_USER_LOGOUT = 'user_logout'
     ACTION_USER_LOGIN_FAILED = 'user_login_failed'
+    
+    # 角色管理相关操作
+    ACTION_ROLE_CREATE = 'role_created'
+    ACTION_ROLE_UPDATE = 'role_updated'
+    ACTION_ROLE_DELETE = 'role_deleted'
     
     # 项目相关操作
     ACTION_PROJECT_CREATE = 'project_created'
@@ -100,6 +106,11 @@ class AuditLog(models.Model):
         (ACTION_USER_LOGIN, '用户登录'),
         (ACTION_USER_LOGOUT, '用户登出'),
         (ACTION_USER_LOGIN_FAILED, '登录失败'),
+        
+        # 角色管理相关操作
+        (ACTION_ROLE_CREATE, '创建角色'),
+        (ACTION_ROLE_UPDATE, '更新角色'),
+        (ACTION_ROLE_DELETE, '删除角色'),
         
         # 项目相关操作
         (ACTION_PROJECT_CREATE, '创建项目'),

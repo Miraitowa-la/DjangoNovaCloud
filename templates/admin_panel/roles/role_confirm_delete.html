@@ -1,0 +1,64 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% load static %}
+
+{% block title %}删除角色 - NovaCloud{% endblock %}
+
+{% block admin_content %}
+<div class="admin-content-header">
+    <h1>删除角色</h1>
+    <p>请确认是否要删除此角色</p>
+</div>
+
+<div class="admin-box">
+    <div class="admin-box-title">
+        <h2>确认删除</h2>
+    </div>
+    
+    <div class="admin-box-content">
+        {% if user_count > 0 %}
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>无法删除！</strong> 当前有 {{ user_count }} 名用户使用此角色。
+                您需要先将这些用户重新分配到其他角色，然后才能删除此角色。
+            </div>
+            
+            <div class="form-actions">
+                <a href="{% url 'admin_panel:role_list' %}" class="btn btn-primary">
+                    <i class="fas fa-arrow-left"></i> 返回角色列表
+                </a>
+            </div>
+        {% else %}
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>警告！</strong> 您即将删除角色 "{{ role.name }}"。此操作不可撤销。
+            </div>
+            
+            <div class="role-info">
+                <h3>角色信息</h3>
+                <dl class="info-list">
+                    <dt>角色名称</dt>
+                    <dd>{{ role.name }}</dd>
+                    
+                    <dt>描述</dt>
+                    <dd>{{ role.description|default:"无描述" }}</dd>
+                    
+                    <dt>拥有权限数</dt>
+                    <dd>{{ role.permissions.count }}</dd>
+                </dl>
+            </div>
+            
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> 确认删除
+                    </button>
+                    <a href="{% url 'admin_panel:role_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> 取消
+                    </a>
+                </div>
+            </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

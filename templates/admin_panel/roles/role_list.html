@@ -1,0 +1,64 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% load static %}
+
+{% block title %}角色管理 - NovaCloud{% endblock %}
+
+{% block admin_content %}
+<div class="admin-content-header">
+    <h1>角色管理</h1>
+    <p>管理系统角色和权限分配</p>
+</div>
+
+<div class="admin-box">
+    <div class="admin-box-title">
+        <h2>角色列表</h2>
+        <div class="admin-box-actions">
+            <a href="{% url 'admin_panel:role_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> 创建角色
+            </a>
+        </div>
+    </div>
+    
+    <div class="admin-box-content">
+        {% if roles %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>角色名称</th>
+                            <th>描述</th>
+                            <th>用户数量</th>
+                            <th>权限数量</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for role in roles %}
+                            <tr>
+                                <td>{{ role.name }}</td>
+                                <td>{{ role.description|default:"" }}</td>
+                                <td>{{ role.user_count }}</td>
+                                <td>{{ role.permissions.count }}</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a href="{% url 'admin_panel:role_edit' role.id %}" class="btn btn-sm btn-secondary">
+                                            <i class="fas fa-edit"></i> 编辑
+                                        </a>
+                                        <a href="{% url 'admin_panel:role_delete' role.id %}" class="btn btn-sm btn-danger">
+                                            <i class="fas fa-trash"></i> 删除
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="no-data-message">
+                <p>目前没有角色。点击 "创建角色" 按钮创建第一个角色。</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 
