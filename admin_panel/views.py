@@ -8,11 +8,13 @@ from django.db.models import Q
 from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse, HttpResponseForbidden
+from django.utils import timezone
+from datetime import timedelta
 
 from accounts.models import UserProfile
-from admin_panel.models import Role
+from admin_panel.models import Role, AuditLog
 from admin_panel.forms import UserCreateForm, UserEditForm
-from .utils import get_subordinate_user_ids, get_user_and_subordinates_queryset
+from .utils import get_subordinate_user_ids, get_user_and_subordinates_queryset, create_audit_log
 from iot_devices.models import Project
 
 User = get_user_model()
@@ -68,6 +70,19 @@ class UserCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
         user.save()
         form.save_m2m()  # 保存多对多关系
         
+        # 记录审计日志
+        role_name = "无角色"
+        if hasattr(user, 'profile') and user.profile.role:
+            role_name = user.profile.role.name
+            
+        create_audit_log(
+            user=self.request.user,
+            action=AuditLog.ACTION_USER_CREATE,
+            target_object=user,
+            details=f"创建用户 {user.username}，设置角色为 {role_name}",
+            request=self.request
+        )
+        
         messages.success(self.request, f'用户 {user.username} 创建成功！')
         return super().form_valid(form)
     
@@ -104,6 +119,42 @@ class UserUpdateView(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
     
     def form_valid(self, form):
         user = form.save()
+        
+        # 构建审计日志详情
+        details = f"更新用户 {user.username} 的信息"
+        
+        # 如果有角色变更，特别记录
+        if 'role' in form.changed_data:
+            old_role = "无角色"
+            if hasattr(self.object, 'profile') and self.object.profile.role_id:
+                try:
+                    old_role = Role.objects.get(id=self.object.profile.role_id).name
+                except Role.DoesNotExist:
+                    pass
+                
+            new_role = "无角色"
+            if form.cleaned_data.get('role'):
+                new_role = form.cleaned_data['role'].name
+                
+            if old_role != new_role:
+                # 添加角色变更的审计日志
+                create_audit_log(
+                    user=self.request.user,
+                    action=AuditLog.ACTION_ROLE_CHANGE,
+                    target_object=user,
+                    details=f"修改用户 {user.username} 的角色，从 {old_role} 变更为 {new_role}",
+                    request=self.request
+                )
+        
+        # 记录常规更新审计日志
+        create_audit_log(
+            user=self.request.user,
+            action=AuditLog.ACTION_USER_UPDATE,
+            target_object=user,
+            details=details,
+            request=self.request
+        )
+        
         messages.success(self.request, f'用户 {user.username} 更新成功！')
         return super().form_valid(form)
     
@@ -126,7 +177,17 @@ class UserDeleteView(LoginRequiredMixin, AdminRequiredMixin, DeleteView):
     
     def delete(self, request, *args, **kwargs):
         user = self.get_object()
-        messages.success(request, f'用户 {user.username} 已删除！')
+        username = user.username  # 保存用户名供日志使用
+        
+        # 记录审计日志
+        create_audit_log(
+            user=self.request.user,
+            action=AuditLog.ACTION_USER_DELETE,
+            details=f"删除用户 {username}",
+            request=self.request
+        )
+        
+        messages.success(request, f'用户 {username} 已删除！')
         return super().delete(request, *args, **kwargs)
 
 # 切换用户激活状态
@@ -137,10 +198,23 @@ class UserToggleActiveView(LoginRequiredMixin, AdminRequiredMixin, View):
         else:
             user = get_object_or_404(User, pk=pk, profile__parent_user=request.user)
         
-        user.is_active = not user.is_active
+        # 切换状态前记录原状态
+        was_active = user.is_active
+        user.is_active = not was_active
         user.save()
         
+        # 记录审计日志
+        action = AuditLog.ACTION_USER_ACTIVATE if user.is_active else AuditLog.ACTION_USER_DEACTIVATE
         status = "启用" if user.is_active else "禁用"
+        
+        create_audit_log(
+            user=request.user,
+            action=action,
+            target_object=user,
+            details=f"{status}用户 {user.username}",
+            request=request
+        )
+        
         messages.success(request, f'用户 {user.username} 已{status}！')
         
         return redirect('admin_panel:user_detail', pk=pk)
@@ -168,6 +242,16 @@ class UserResetPasswordView(LoginRequiredMixin, AdminRequiredMixin, View):
         form = SetPasswordForm(user, request.POST)
         if form.is_valid():
             form.save()
+            
+            # 记录审计日志
+            create_audit_log(
+                user=request.user,
+                action=AuditLog.ACTION_PASSWORD_RESET,
+                target_object=user,
+                details=f"重置用户 {user.username} 的密码",
+                request=request
+            )
+            
             messages.success(request, f'用户 {user.username} 的密码已重置！')
             return redirect('admin_panel:user_detail', pk=pk)
         
@@ -200,6 +284,115 @@ class GlobalProjectListView(LoginRequiredMixin, AdminRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['title'] = '全局项目'
         context['is_admin_view'] = True
+        return context
+
+# 审计日志列表视图
+class AuditLogListView(LoginRequiredMixin, AdminRequiredMixin, ListView):
+    """审计日志列表视图，仅限管理员访问"""
+    model = AuditLog
+    template_name = 'admin_panel/audit_logs/audit_log_list.html'
+    context_object_name = 'logs'
+    paginate_by = 50  # 每页显示50条日志
+    
+    def get_queryset(self):
+        """根据筛选条件返回审计日志"""
+        queryset = AuditLog.objects.all().order_by('-timestamp')
+        
+        # 用户筛选
+        user_id = self.request.GET.get('user')
+        if user_id:
+            try:
+                queryset = queryset.filter(user_id=int(user_id))
+            except (ValueError, TypeError):
+                pass
+                
+        # 操作类型筛选
+        action = self.request.GET.get('action')
+        if action:
+            queryset = queryset.filter(action=action)
+        
+        # 时间范围筛选
+        time_range = self.request.GET.get('time_range', '7d')  # 默认查看过去7天
+        
+        now = timezone.now()
+        if time_range == '24h':
+            start_time = now - timedelta(hours=24)
+        elif time_range == '7d':
+            start_time = now - timedelta(days=7)
+        elif time_range == '30d':
+            start_time = now - timedelta(days=30)
+        elif time_range == 'all':
+            start_time = None
+        else:
+            start_time = now - timedelta(days=7)
+            
+        if start_time:
+            queryset = queryset.filter(timestamp__gte=start_time)
+        
+        # 搜索功能 - 增强版
+        search = self.request.GET.get('search')
+        if search:
+            username_search = None
+            content_search = None
+            ip_search = None
+            
+            # 处理特殊搜索语法
+            search_terms = search.split()
+            
+            # 提取特殊搜索条件
+            for term in search_terms:
+                if term.startswith('@'):
+                    username_search = term[1:]  # 去掉@符号
+                elif term.startswith('#'):
+                    content_search = term[1:]  # 去掉#符号
+                elif term.startswith('%'):
+                    ip_search = term[1:]  # 去掉%符号
+            
+            # 使用 AND 逻辑组合多个条件（而非 OR 逻辑）
+            # 首先检查是否有特殊搜索条件
+            has_special_search = username_search is not None or content_search is not None or ip_search is not None
+            
+            if has_special_search:
+                # 应用特殊搜索条件，同时满足所有指定的条件
+                if username_search:
+                    queryset = queryset.filter(user__username__icontains=username_search)
+                
+                if content_search:
+                    queryset = queryset.filter(details__icontains=content_search)
+                
+                if ip_search:
+                    queryset = queryset.filter(ip_address__icontains=ip_search)
+            else:
+                # 如果没有特殊搜索语法，则进行普通搜索
+                queryset = queryset.filter(
+                    Q(user__username__icontains=search) |
+                    Q(details__icontains=search) |
+                    Q(ip_address__icontains=search)
+                )
+            
+        return queryset
+    
+    def get_context_data(self, **kwargs):
+        """添加额外上下文"""
+        context = super().get_context_data(**kwargs)
+        context['title'] = '操作审计日志'
+        context['action_choices'] = AuditLog.ACTION_CHOICES
+        
+        # 获取筛选参数供模板使用
+        context['selected_user'] = self.request.GET.get('user', '')
+        context['selected_action'] = self.request.GET.get('action', '')
+        context['selected_time_range'] = self.request.GET.get('time_range', '7d')
+        context['search_query'] = self.request.GET.get('search', '')
+        
+        # 获取用户列表供筛选使用
+        context['users'] = User.objects.all()
+        
+        # 保存当前查询字符串，便于分页使用
+        query_params = self.request.GET.copy()
+        if 'page' in query_params:
+            del query_params['page']
+        context['query_string'] = query_params.urlencode()
+        
         return context
 
 # 用户层级树状图视图

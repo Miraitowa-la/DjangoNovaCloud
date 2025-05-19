@@ -18,4 +18,7 @@ urlpatterns = [
     
     # 新增：全局项目概览
     path('projects/all/', views.GlobalProjectListView.as_view(), name='global_project_list'),
+    
+    # 新增：审计日志
+    path('audit-logs/', views.AuditLogListView.as_view(), name='audit_log_list'),
 ] 
