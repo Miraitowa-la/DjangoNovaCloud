@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'mqtt_client',
     'tcp_server',
     'strategy_engine',
+    'admin_panel',  # 新添加的管理员面板应用
 ]
 
 MIDDLEWARE = [
