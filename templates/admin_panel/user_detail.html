@@ -1,0 +1,158 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% load static %}
+
+{% block title %}用户详情 - NovaCloud{% endblock %}
+
+{% block admin_content %}
+<div class="admin-header">
+    <h2>用户详情</h2>
+    <div class="admin-path">
+        <i class="fas fa-home"></i> / 
+        <span>管理面板</span> / 
+        <a href="{% url 'admin_panel:user_list' %}">用户管理</a> /
+        <span>用户详情</span>
+    </div>
+</div>
+
+{% if messages %}
+<div class="messages mb-4">
+    {% for message in messages %}
+    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="admin-box">
+            <div class="admin-box-title d-flex justify-content-between align-items-center">
+                <span>基本信息</span>
+                <div class="btn-group btn-group-sm">
+                    <a href="{% url 'admin_panel:user_update' user_obj.id %}" class="btn btn-primary">
+                        <i class="fas fa-edit"></i> 编辑
+                    </a>
+                    <a href="{% url 'admin_panel:user_delete' user_obj.id %}" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> 删除
+                    </a>
+                </div>
+            </div>
+            
+            <div class="user-info">
+                <table class="table">
+                    <tr>
+                        <th style="width: 30%">用户名</th>
+                        <td>{{ user_obj.username }}</td>
+                    </tr>
+                    <tr>
+                        <th>电子邮件</th>
+                        <td>{{ user_obj.email|default:"未设置" }}</td>
+                    </tr>
+                    <tr>
+                        <th>姓名</th>
+                        <td>{{ user_obj.get_full_name|default:"未设置" }}</td>
+                    </tr>
+                    <tr>
+                        <th>注册时间</th>
+                        <td>{{ user_obj.date_joined|date:"Y-m-d H:i:s" }}</td>
+                    </tr>
+                    <tr>
+                        <th>最后登录</th>
+                        <td>{{ user_obj.last_login|date:"Y-m-d H:i:s"|default:"从未登录" }}</td>
+                    </tr>
+                    <tr>
+                        <th>账户状态</th>
+                        <td>
+                            {% if user_obj.is_active %}
+                                <span class="badge bg-success">激活</span>
+                            {% else %}
+                                <span class="badge bg-danger">禁用</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>管理员权限</th>
+                        <td>
+                            {% if user_obj.is_staff %}
+                                <span class="badge bg-info">是</span>
+                            {% else %}
+                                <span class="badge bg-secondary">否</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="admin-box">
+            <div class="admin-box-title">账户操作</div>
+            
+            <div class="d-grid gap-2">
+                <form method="post" action="{% url 'admin_panel:user_toggle_active' user_obj.id %}">
+                    {% csrf_token %}
+                    {% if user_obj.is_active %}
+                        <button type="submit" class="btn btn-warning btn-block mb-2">
+                            <i class="fas fa-user-slash"></i> 禁用账户
+                        </button>
+                    {% else %}
+                        <button type="submit" class="btn btn-success btn-block mb-2">
+                            <i class="fas fa-user-check"></i> 启用账户
+                        </button>
+                    {% endif %}
+                </form>
+                
+                <a href="{% url 'admin_panel:user_reset_password' user_obj.id %}" class="btn btn-secondary">
+                    <i class="fas fa-key"></i> 重置密码
+                </a>
+            </div>
+        </div>
+        
+        <div class="admin-box">
+            <div class="admin-box-title">角色信息</div>
+            
+            <div class="role-info">
+                {% if user_obj.profile.role %}
+                    <div class="role-name mb-2">
+                        <span class="badge bg-primary" style="font-size: 1rem;">{{ user_obj.profile.role.name }}</span>
+                    </div>
+                    <div class="role-description">
+                        <p>{{ user_obj.profile.role.description|default:"无描述" }}</p>
+                    </div>
+                {% else %}
+                    <div class="empty-state text-center py-3">
+                        <i class="fas fa-user-tag fa-2x text-muted mb-3"></i>
+                        <p>未分配角色</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="admin-box">
+            <div class="admin-box-title">上级用户</div>
+            
+            <div class="parent-user-info">
+                {% if user_obj.profile.parent_user %}
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-user-tie fa-2x text-primary"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="mb-1">{{ user_obj.profile.parent_user.username }}</h5>
+                            <p class="mb-0 text-muted">{{ user_obj.profile.parent_user.email }}</p>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="empty-state text-center py-3">
+                        <i class="fas fa-user-tie fa-2x text-muted mb-3"></i>
+                        <p>无上级用户</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

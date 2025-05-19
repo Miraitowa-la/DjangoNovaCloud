@@ -7,6 +7,7 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'fontawesome/css/all.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
     <header class="site-header">
@@ -20,6 +21,9 @@
                         <li>欢迎，{{ user.username }}</li>
                         <li><a href="{% url 'core:index' %}">首页</a></li>
                         <li><a href="{% url 'iot_devices:project_list' %}">项目管理</a></li>
+                        {% if user.is_staff or user.profile.role.permissions.exists %}
+                        <li><a href="{% url 'admin_panel:user_list' %}">管理面板</a></li>
+                        {% endif %}
                         <li>
                             <form method="post" action="{% url 'accounts:logout' %}" class="logout-form">
                                 {% csrf_token %}

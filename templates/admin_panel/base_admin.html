@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .admin-container {
+        display: flex;
+        flex-wrap: wrap;
+        margin-top: 20px;
+    }
+    
+    .admin-sidebar {
+        flex: 0 0 250px;
+        padding: 15px;
+        background-color: var(--card-bg);
+        border-radius: 8px;
+        box-shadow: 0 2px 5px var(--card-shadow);
+        margin-right: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .admin-content {
+        flex: 1;
+        min-width: 300px;
+    }
+    
+    .admin-sidebar .menu-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: var(--primary-color);
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .admin-sidebar .menu-list {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .admin-sidebar .menu-list li {
+        margin-bottom: 5px;
+    }
+    
+    .admin-sidebar .menu-list a {
+        display: block;
+        padding: 10px 15px;
+        color: var(--text-color);
+        text-decoration: none;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+    }
+    
+    .admin-sidebar .menu-list a:hover {
+        background-color: var(--primary-color);
+        color: white;
+    }
+    
+    .admin-sidebar .menu-list a.active {
+        background-color: var(--primary-color);
+        color: white;
+    }
+    
+    .admin-sidebar .menu-list i {
+        margin-right: 10px;
+        width: 20px;
+        text-align: center;
+    }
+    
+    .admin-header {
+        margin-bottom: 20px;
+    }
+    
+    .admin-header h2 {
+        margin-bottom: 10px;
+    }
+    
+    .admin-path {
+        font-size: 0.9rem;
+        color: var(--text-light);
+        margin-bottom: 15px;
+    }
+    
+    .admin-box {
+        background-color: var(--card-bg);
+        border-radius: 8px;
+        box-shadow: 0 2px 5px var(--card-shadow);
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .admin-box-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    @media (max-width: 768px) {
+        .admin-container {
+            flex-direction: column;
+        }
+        
+        .admin-sidebar {
+            flex: 0 0 100%;
+            margin-right: 0;
+            margin-bottom: 20px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="admin-sidebar">
+        <div class="menu-title">管理面板</div>
+        <ul class="menu-list">
+            <li>
+                <a href="{% url 'admin_panel:user_list' %}" {% if request.resolver_match.url_name == 'user_list' %}class="active"{% endif %}>
+                    <i class="fas fa-users"></i> 用户管理
+                </a>
+            </li>
+            <!-- 后续可添加其他管理功能 -->
+            <li>
+                <a href="#" class="disabled">
+                    <i class="fas fa-user-shield"></i> 角色管理
+                </a>
+            </li>
+            <li>
+                <a href="#" class="disabled">
+                    <i class="fas fa-chart-line"></i> 系统监控
+                </a>
+            </li>
+            <li>
+                <a href="#" class="disabled">
+                    <i class="fas fa-cog"></i> 系统设置
+                </a>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="admin-content">
+        {% block admin_content %}{% endblock %}
+    </div>
+</div>
+{% endblock %} 

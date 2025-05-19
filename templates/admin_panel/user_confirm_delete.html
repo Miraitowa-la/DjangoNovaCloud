@@ -1,0 +1,68 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% load static %}
+
+{% block title %}确认删除用户 - NovaCloud{% endblock %}
+
+{% block admin_content %}
+<div class="admin-header">
+    <h2>确认删除用户</h2>
+    <div class="admin-path">
+        <i class="fas fa-home"></i> / 
+        <span>管理面板</span> / 
+        <a href="{% url 'admin_panel:user_list' %}">用户管理</a> /
+        <span>删除用户</span>
+    </div>
+</div>
+
+<div class="admin-box">
+    <div class="admin-box-title">
+        <i class="fas fa-exclamation-triangle text-danger me-2"></i> 删除确认
+    </div>
+    
+    <div class="alert alert-danger mb-4">
+        <h5 class="alert-heading"><i class="fas fa-exclamation-circle me-2"></i>警告！</h5>
+        <p>删除操作不可逆转，用户数据将永久丢失。请确认您真的要删除此用户。</p>
+    </div>
+    
+    <div class="user-info mb-4">
+        <div class="card">
+            <div class="card-header bg-light">
+                <strong>用户信息</strong>
+            </div>
+            <div class="card-body">
+                <p><strong>用户名:</strong> {{ user_obj.username }}</p>
+                <p><strong>电子邮件:</strong> {{ user_obj.email|default:"未设置" }}</p>
+                <p><strong>姓名:</strong> {{ user_obj.get_full_name|default:"未设置" }}</p>
+                <p><strong>角色:</strong> 
+                    {% if user_obj.profile.role %}
+                        {{ user_obj.profile.role.name }}
+                    {% else %}
+                        未设置
+                    {% endif %}
+                </p>
+                <p><strong>注册时间:</strong> {{ user_obj.date_joined|date:"Y-m-d H:i:s" }}</p>
+                <p>
+                    <strong>账户状态:</strong>
+                    {% if user_obj.is_active %}
+                        <span class="badge bg-success">激活</span>
+                    {% else %}
+                        <span class="badge bg-danger">禁用</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-buttons">
+            <a href="{% url 'admin_panel:user_detail' user_obj.id %}" class="btn btn-secondary me-2">
+                <i class="fas fa-times"></i> 取消
+            </a>
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash"></i> 确认删除
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %} 

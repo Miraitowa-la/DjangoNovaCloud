@@ -24,4 +24,5 @@ urlpatterns = [
     path('', include('iot_devices.urls')),
     path('', include('mqtt_client.urls')),
     path('', include('strategy_engine.urls')),
+    path('admin-panel/', include('admin_panel.urls')),  # 注意：使用admin-panel而不是admin避免与Django管理站点冲突
 ]
