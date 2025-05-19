@@ -4,14 +4,9 @@
 {% block title %}用户详情 - NovaCloud{% endblock %}
 
 {% block admin_content %}
-<div class="admin-header">
-    <h2>用户详情</h2>
-    <div class="admin-path">
-        <i class="fas fa-home"></i> / 
-        <span>管理面板</span> / 
-        <a href="{% url 'admin_panel:user_list' %}">用户管理</a> /
-        <span>用户详情</span>
-    </div>
+<div class="admin-content-header">
+    <h1>用户详情</h1>
+    <p>查看用户账号的详细信息和管理选项</p>
 </div>
 
 {% if messages %}
@@ -31,10 +26,10 @@
             <div class="admin-box-title d-flex justify-content-between align-items-center">
                 <span>基本信息</span>
                 <div class="btn-group btn-group-sm">
-                    <a href="{% url 'admin_panel:user_update' user_obj.id %}" class="btn btn-primary">
+                    <a href="{% url 'admin_panel:user_update' user_obj.id %}" class="btn btn-primary" style="min-width: 80px;">
                         <i class="fas fa-edit"></i> 编辑
                     </a>
-                    <a href="{% url 'admin_panel:user_delete' user_obj.id %}" class="btn btn-danger">
+                    <a href="{% url 'admin_panel:user_delete' user_obj.id %}" class="btn btn-danger" style="min-width: 80px;">
                         <i class="fas fa-trash"></i> 删除
                     </a>
                 </div>

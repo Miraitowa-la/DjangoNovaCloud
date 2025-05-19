@@ -1,0 +1,90 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% load static %}
+
+{% block title %}全局项目 - NovaCloud管理面板{% endblock %}
+
+{% block admin_content %}
+    <div class="admin-content-header">
+        <h1>全局项目</h1>
+        <p>管理员可查看范围内的所有项目</p>
+    </div>
+
+    <div class="admin-box">
+        <div class="admin-box-title d-flex justify-content-between align-items-center">
+            <h2>项目列表</h2>
+            <div class="search-filter-box">
+                <input type="text" id="projectSearch" class="form-control" placeholder="搜索项目..." onkeyup="filterProjects()">
+            </div>
+        </div>
+        
+        <div class="admin-box-content">
+            {% if projects %}
+                <div class="table-responsive">
+                    <table class="table table-hover" id="projectTable">
+                        <thead>
+                            <tr class="table-header-row">
+                                <th>项目号</th>
+                                <th>名称</th>
+                                <th>所有者</th>
+                                <th>创建时间</th>
+                                <th>设备数量</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for project in projects %}
+                                <tr>
+                                    <td>{{ project.project_id }}</td>
+                                    <td>{{ project.name }}</td>
+                                    <td>{{ project.owner.username }}</td>
+                                    <td>{{ project.created_at|date:"Y-m-d H:i" }}</td>
+                                    <td>{{ project.devices.count }}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{% url 'iot_devices:project_detail' project.project_id %}" class="btn btn-info" title="查看">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-project-diagram fa-3x text-muted mb-3"></i>
+                    <p>没有找到项目记录</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function filterProjects() {
+    var input, filter, table, tr, td, i, txtValue;
+    input = document.getElementById("projectSearch");
+    filter = input.value.toUpperCase();
+    table = document.getElementById("projectTable");
+    tr = table.getElementsByTagName("tr");
+
+    for (i = 1; i < tr.length; i++) {
+        let visible = false;
+        // 检查项目号、项目名称和所有者
+        for (let j = 0; j < 3; j++) {
+            td = tr[i].getElementsByTagName("td")[j];
+            if (td) {
+                txtValue = td.textContent || td.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    visible = true;
+                    break;
+                }
+            }
+        }
+        tr[i].style.display = visible ? "" : "none";
+    }
+}
+</script>
+{% endblock %} 

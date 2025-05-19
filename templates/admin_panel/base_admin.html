@@ -6,17 +6,27 @@
     .admin-container {
         display: flex;
         flex-wrap: wrap;
-        margin-top: 20px;
+        margin-top: 0;
+        min-height: 600px; /* 确保容器有最小高度 */
     }
     
     .admin-sidebar {
         flex: 0 0 250px;
         padding: 15px;
         background-color: var(--card-bg);
-        border-radius: 8px;
-        box-shadow: 0 2px 5px var(--card-shadow);
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
         margin-right: 20px;
         margin-bottom: 20px;
+        min-height: 600px; /* 设置最小高度确保一致 */
+        border: 1px solid rgba(230, 230, 230, 0.5);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+    
+    body.dark-mode .admin-sidebar {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25), 0 1px 3px rgba(0, 0, 0, 0.18);
+        border: 1px solid rgba(60, 60, 60, 0.5);
     }
     
     .admin-content {
@@ -84,10 +94,27 @@
     
     .admin-box {
         background-color: var(--card-bg);
-        border-radius: 8px;
-        box-shadow: 0 2px 5px var(--card-shadow);
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
         padding: 20px;
         margin-bottom: 20px;
+        border: 1px solid rgba(230, 230, 230, 0.5);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition: box-shadow 0.3s ease;
+    }
+    
+    .admin-box:hover {
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15), 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    body.dark-mode .admin-box {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25), 0 1px 3px rgba(0, 0, 0, 0.18);
+        border: 1px solid rgba(60, 60, 60, 0.5);
+    }
+    
+    body.dark-mode .admin-box:hover {
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35), 0 2px 5px rgba(0, 0, 0, 0.2);
     }
     
     .admin-box-title {
@@ -96,6 +123,206 @@
         margin-bottom: 20px;
         padding-bottom: 10px;
         border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .admin-content-header {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--border-color);
+        background-color: var(--card-bg);
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(230, 230, 230, 0.5);
+    }
+    
+    body.dark-mode .admin-content-header {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(60, 60, 60, 0.5);
+    }
+    
+    .admin-content-header h1 {
+        font-size: 1.8rem;
+        margin-bottom: 8px;
+        color: var(--text-color);
+    }
+    
+    .admin-content-header p {
+        color: var(--text-light);
+        margin-bottom: 0;
+        font-size: 1rem;
+    }
+    
+    .search-filter-box {
+        display: flex;
+        align-items: center;
+    }
+    
+    .search-filter-box .form-control {
+        width: 250px;
+        padding: 8px 12px;
+        border-radius: 4px;
+        border: 1px solid var(--border-color);
+        background-color: var(--input-bg);
+        color: var(--text-color);
+    }
+    
+    .table {
+        border-collapse: separate;
+        border-spacing: 0;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        margin-bottom: 0;
+        width: 100%;
+    }
+    
+    .table-header-row {
+        background-color: var(--card-header-bg);
+    }
+    
+    .table th {
+        border-bottom: 2px solid var(--border-color);
+        padding: 12px 10px;
+        font-weight: 600;
+        text-align: left;
+        color: var(--text-color);
+    }
+    
+    .table td {
+        padding: 12px 10px;
+        border-bottom: 1px solid var(--border-light);
+        color: var(--text-color);
+    }
+    
+    .table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .table tbody tr:hover {
+        background-color: var(--feature-card-bg);
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: var(--text-light);
+    }
+    
+    /* 禁用状态链接 */
+    .admin-sidebar .menu-list a.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+    
+    /* 按钮样式统一 */
+    .btn {
+        display: inline-block;
+        padding: 6px 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        text-decoration: none;
+        text-align: center;
+        transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    }
+    
+    .btn-sm {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+    
+    .btn-primary {
+        background-color: var(--primary-color);
+        color: #fff;
+    }
+    
+    .btn-primary:hover {
+        background-color: var(--secondary-color);
+        color: #fff;
+    }
+    
+    .btn-outline-primary {
+        background-color: transparent;
+        color: var(--primary-color);
+        border: 1px solid var(--primary-color);
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: var(--primary-color);
+        color: #fff;
+    }
+    
+    .btn-outline-secondary {
+        background-color: transparent;
+        color: var(--text-color);
+        border: 1px solid var(--border-color);
+    }
+    
+    .btn-outline-secondary:hover {
+        background-color: var(--feature-card-bg);
+        border-color: var(--text-color);
+    }
+    
+    /* 统一各页面的布局尺寸 */
+    .admin-box-content {
+        padding: 0;
+    }
+    
+    .admin-box-toolbar {
+        margin-bottom: 15px;
+        display: flex;
+        justify-content: flex-end;
+    }
+    
+    .badge {
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-weight: normal;
+    }
+    
+    /* 增强按钮组样式 */
+    .btn-group {
+        display: flex;
+        gap: 5px;
+    }
+    
+    .btn-group .btn {
+        border-radius: 4px;
+    }
+    
+    /* 卡片内部元素样式增强 */
+    .admin-box .card {
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    .admin-box .card-header {
+        background-color: var(--card-header-bg);
+        border-bottom: 1px solid var(--border-color);
+        padding: 10px 15px;
+    }
+    
+    /* 表单样式增强 */
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        border-radius: 6px;
+        transition: all 0.2s ease;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        border-color: var(--primary-color);
     }
     
     @media (max-width: 768px) {
@@ -108,6 +335,20 @@
             margin-right: 0;
             margin-bottom: 20px;
         }
+        
+        .search-filter-box .form-control {
+            width: 100%;
+        }
+        
+        .admin-box-title {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .search-filter-box {
+            width: 100%;
+            margin-top: 10px;
+        }
     }
 </style>
 {% endblock %}
@@ -118,8 +359,18 @@
         <div class="menu-title">管理面板</div>
         <ul class="menu-list">
             <li>
-                <a href="{% url 'admin_panel:user_list' %}" {% if request.resolver_match.url_name == 'user_list' %}class="active"{% endif %}>
+                <a href="{% url 'admin_panel:user_list' %}" {% if request.resolver_match.url_name == 'user_list' or request.resolver_match.url_name == 'user_create' or request.resolver_match.url_name == 'user_detail' or request.resolver_match.url_name == 'user_update' or request.resolver_match.url_name == 'user_delete' or request.resolver_match.url_name == 'user_reset_password' %}class="active"{% endif %}>
                     <i class="fas fa-users"></i> 用户管理
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'admin_panel:user_hierarchy' %}" {% if request.resolver_match.url_name == 'user_hierarchy' %}class="active"{% endif %}>
+                    <i class="fas fa-sitemap"></i> 用户层级
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'admin_panel:global_project_list' %}" {% if request.resolver_match.url_name == 'global_project_list' %}class="active"{% endif %}>
+                    <i class="fas fa-project-diagram"></i> 全局项目
                 </a>
             </li>
             <!-- 后续可添加其他管理功能 -->

@@ -1,15 +1,21 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView, View
+from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView, View, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.models import User
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 from django.db.models import Q
 from django.contrib.auth.forms import SetPasswordForm
+from django.contrib.auth import get_user_model
+from django.http import JsonResponse, HttpResponseForbidden
 
 from accounts.models import UserProfile
 from admin_panel.models import Role
 from admin_panel.forms import UserCreateForm, UserEditForm
+from .utils import get_subordinate_user_ids, get_user_and_subordinates_queryset
+from iot_devices.models import Project
+
+User = get_user_model()
 
 # Create your views here.
 
@@ -169,3 +175,74 @@ class UserResetPasswordView(LoginRequiredMixin, AdminRequiredMixin, View):
             'form': form,
             'user_obj': user
         })
+
+# 全局项目视图
+class GlobalProjectListView(LoginRequiredMixin, AdminRequiredMixin, ListView):
+    """全局项目视图，仅限管理员访问"""
+    model = Project
+    template_name = 'admin_panel/projects/global_project_list.html'
+    context_object_name = 'projects'
+    
+    def get_queryset(self):
+        """根据管理员权限返回可管理的项目"""
+        user = self.request.user
+        
+        # 超级管理员可查看所有项目
+        if user.is_superuser:
+            return Project.objects.all()
+        
+        # 其他管理员可查看其下级用户的项目
+        user_ids = get_subordinate_user_ids(user)
+        return Project.objects.filter(owner__id__in=user_ids)
+    
+    def get_context_data(self, **kwargs):
+        """添加额外上下文"""
+        context = super().get_context_data(**kwargs)
+        context['title'] = '全局项目'
+        context['is_admin_view'] = True
+        return context
+
+# 用户层级树状图视图
+class UserHierarchyView(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
+    """用户层级树状图视图，仅限管理员访问"""
+    template_name = 'admin_panel/users/user_hierarchy.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        
+        # 构建用户树状结构
+        if user.is_superuser:
+            # 超级管理员从根用户开始构建完整树
+            root_users = User.objects.filter(profile__parent_user__isnull=True)
+            user_tree = self._build_user_tree(root_users)
+        else:
+            # 其他管理员从自己开始构建树
+            user_tree = [self._build_user_subtree(user)]
+            
+        context['user_tree'] = user_tree
+        context['title'] = '用户层级结构'
+        return context
+    
+    def _build_user_tree(self, users):
+        """构建多个用户的树状结构"""
+        return [self._build_user_subtree(user) for user in users]
+    
+    def _build_user_subtree(self, user):
+        """递归构建单个用户及其下级的树状结构"""
+        # 获取用户的角色名称（如果有）
+        role_name = user.profile.role.name if hasattr(user, 'profile') and user.profile.role else '无角色'
+        
+        # 查询用户的直接下级
+        subordinates = User.objects.filter(profile__parent_user=user)
+        
+        # 构建用户节点，包括ID、用户名、角色和子节点
+        node = {
+            'id': user.id,
+            'username': user.username,
+            'role': role_name,
+            'is_active': user.is_active,
+            'children': [self._build_user_subtree(sub) for sub in subordinates] if subordinates else []
+        }
+        
+        return node

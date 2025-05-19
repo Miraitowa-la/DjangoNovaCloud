@@ -4,21 +4,22 @@
 {% block title %}用户管理 - NovaCloud{% endblock %}
 
 {% block admin_content %}
-<div class="admin-header">
-    <h2>用户管理</h2>
-    <div class="admin-path">
-        <i class="fas fa-home"></i> / 
-        <span>管理面板</span> / 
-        <span>用户管理</span>
-    </div>
+<div class="admin-content-header">
+    <h1>用户管理</h1>
+    <p>管理用户账号、角色和权限设置</p>
 </div>
 
 <div class="admin-box">
     <div class="admin-box-title d-flex justify-content-between align-items-center">
-        <span>用户列表</span>
+        <h2>用户列表</h2>
+        <div class="d-flex align-items-center">
+            <div class="search-filter-box me-3">
+                <input type="text" id="userSearch" class="form-control" placeholder="搜索用户..." onkeyup="filterUsers()">
+            </div>
         <a href="{% url 'admin_panel:user_create' %}" class="btn btn-primary btn-sm">
             <i class="fas fa-plus"></i> 创建用户
         </a>
+        </div>
     </div>
     
     {% if messages %}
@@ -32,10 +33,11 @@
     </div>
     {% endif %}
     
+    <div class="admin-box-content">
     <div class="table-responsive">
-        <table class="table table-hover">
+            <table class="table table-hover" id="userTable">
             <thead>
-                <tr>
+                    <tr class="table-header-row">
                     <th>用户名</th>
                     <th>电子邮件</th>
                     <th>姓名</th>
@@ -97,4 +99,33 @@
         </table>
     </div>
 </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function filterUsers() {
+    var input, filter, table, tr, td, i, txtValue;
+    input = document.getElementById("userSearch");
+    filter = input.value.toUpperCase();
+    table = document.getElementById("userTable");
+    tr = table.getElementsByTagName("tr");
+
+    for (i = 1; i < tr.length; i++) {
+        let visible = false;
+        // 检查用户名、电子邮件和姓名
+        for (let j = 0; j < 3; j++) {
+            td = tr[i].getElementsByTagName("td")[j];
+            if (td) {
+                txtValue = td.textContent || td.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    visible = true;
+                    break;
+                }
+            }
+        }
+        tr[i].style.display = visible ? "" : "none";
+    }
+}
+</script>
 {% endblock %} 

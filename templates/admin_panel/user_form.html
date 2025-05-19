@@ -4,14 +4,9 @@
 {% block title %}{{ title }} - NovaCloud{% endblock %}
 
 {% block admin_content %}
-<div class="admin-header">
-    <h2>{{ title }}</h2>
-    <div class="admin-path">
-        <i class="fas fa-home"></i> / 
-        <span>管理面板</span> / 
-        <a href="{% url 'admin_panel:user_list' %}">用户管理</a> /
-        <span>{{ title }}</span>
-    </div>
+<div class="admin-content-header">
+    <h1>{{ title }}</h1>
+    <p>管理用户账号信息和权限设置</p>
 </div>
 
 <div class="admin-box">
@@ -118,7 +113,7 @@
         </div>
         
         <div class="form-buttons">
-            <a href="{% url 'admin_panel:user_list' %}" class="btn btn-secondary me-2">
+            <a href="{% url 'admin_panel:user_list' %}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> 返回列表
             </a>
             <button type="submit" class="btn btn-primary">
@@ -154,9 +149,19 @@
     }
     
     .form-buttons {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
         margin-top: 30px;
         padding-top: 20px;
         border-top: 1px solid var(--border-color);
+    }
+    
+    .form-buttons .btn {
+        flex: 1;
+        padding: 10px 15px;
+        font-size: 14px;
+        text-align: center;
     }
 </style>
 {% endblock %} 

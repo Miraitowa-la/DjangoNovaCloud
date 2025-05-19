@@ -385,7 +385,7 @@ a:hover {
 .dashboard {
     padding: 20px;
     background-color: var(--card-bg);
-    border-radius: 8px;
+    border-radius: 12px;
     box-shadow: 0 2px 10px var(--shadow-color);
 }
 
@@ -450,7 +450,7 @@ a:hover {
 /* 添加物联网设备管理样式 */
 .content-section {
     background-color: var(--card-bg);
-    border-radius: 8px;
+    border-radius: 12px;
     box-shadow: 0 2px 10px var(--shadow-color);
     padding: 25px;
     margin-bottom: 30px;

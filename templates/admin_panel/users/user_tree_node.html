@@ -1,0 +1,21 @@
+<ul>
+    {% for node in nodes %}
+        <li>
+            <div class="user-node {% if not node.is_active %}user-inactive{% endif %}">
+                <strong>{{ node.username }}</strong>
+                <span class="badge badge-info">{{ node.role }}</span>
+                {% if not node.is_active %}
+                    <span class="badge badge-warning">已禁用</span>
+                {% endif %}
+                <div class="node-actions">
+                    <a href="{% url 'admin_panel:user_detail' node.id %}" class="btn btn-sm btn-outline-primary">查看</a>
+                    <a href="{% url 'admin_panel:user_update' node.id %}" class="btn btn-sm btn-outline-secondary">编辑</a>
+                </div>
+            </div>
+            
+            {% if node.children %}
+                {% include "admin_panel/users/user_tree_node.html" with nodes=node.children %}
+            {% endif %}
+        </li>
+    {% endfor %}
+</ul> 

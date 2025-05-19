@@ -15,6 +15,9 @@ import uuid
 import json
 import logging
 
+# 导入获取下级用户ID列表的工具函数
+from admin_panel.utils import get_subordinate_user_ids
+
 logger = logging.getLogger(__name__)
 
 
@@ -26,8 +29,28 @@ class ProjectListView(LoginRequiredMixin, ListView):
     context_object_name = 'projects'
     
     def get_queryset(self):
-        """只返回当前用户的项目"""
-        return Project.objects.filter(owner=self.request.user)
+        """
+        根据用户权限返回可访问的项目列表：
+        - 超级管理员可以查看所有项目
+        - 管理员可以查看自己和所有下级用户的项目
+        - 普通用户只能查看自己的项目
+        """
+        user = self.request.user
+        
+        # 超级管理员可查看所有项目
+        if user.is_superuser:
+            return Project.objects.all()
+        
+        # 检查用户是否为管理员（有某种管理角色）
+        is_admin = hasattr(user, 'profile') and user.profile.role and user.profile.role.permissions.exists()
+        
+        # 如果是管理员，可以查看自己和下级用户的项目
+        if is_admin:
+            user_ids = get_subordinate_user_ids(user)
+            return Project.objects.filter(owner__id__in=user_ids)
+        
+        # 普通用户只能查看自己的项目
+        return Project.objects.filter(owner=user)
 
 
 class ProjectDetailView(LoginRequiredMixin, DetailView):
@@ -39,9 +62,26 @@ class ProjectDetailView(LoginRequiredMixin, DetailView):
     def get_object(self):
         """获取项目，确保用户有权限"""
         project = get_object_or_404(Project, project_id=self.kwargs['project_id'])
-        if project.owner != self.request.user:
-            raise HttpResponseForbidden("您没有权限访问此项目")
-        return project
+        user = self.request.user
+        
+        # 超级管理员可以查看任何项目
+        if user.is_superuser:
+            return project
+            
+        # 如果用户是项目所有者，可以查看
+        if project.owner == user:
+            return project
+            
+        # 检查用户是否为管理员
+        is_admin = hasattr(user, 'profile') and user.profile.role and user.profile.role.permissions.exists()
+        
+        # 如果是管理员，检查项目所有者是否为该管理员的下级用户
+        if is_admin:
+            user_ids = get_subordinate_user_ids(user)
+            if project.owner.id in user_ids:
+                return project
+        
+        raise HttpResponseForbidden("您没有权限访问此项目")
     
     def get_context_data(self, **kwargs):
         """添加项目设备列表到上下文"""
@@ -131,9 +171,26 @@ class DeviceDetailView(LoginRequiredMixin, DetailView):
     def get_object(self):
         """获取设备，确保用户有权限"""
         device = get_object_or_404(Device, device_id=self.kwargs['device_id'])
-        if device.project.owner != self.request.user:
-            raise HttpResponseForbidden("您没有权限访问此设备")
-        return device
+        user = self.request.user
+        
+        # 超级管理员可以查看任何设备
+        if user.is_superuser:
+            return device
+            
+        # 如果用户是设备所属项目的所有者，可以查看
+        if device.project.owner == user:
+            return device
+            
+        # 检查用户是否为管理员
+        is_admin = hasattr(user, 'profile') and user.profile.role and user.profile.role.permissions.exists()
+        
+        # 如果是管理员，检查设备所属项目的所有者是否为该管理员的下级用户
+        if is_admin:
+            user_ids = get_subordinate_user_ids(user)
+            if device.project.owner.id in user_ids:
+                return device
+        
+        raise HttpResponseForbidden("您没有权限访问此设备")
     
     def get_context_data(self, **kwargs):
         """添加设备的传感器和执行器到上下文"""

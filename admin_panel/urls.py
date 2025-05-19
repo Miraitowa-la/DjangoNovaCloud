@@ -12,4 +12,10 @@ urlpatterns = [
     path('users/<int:pk>/delete/', views.UserDeleteView.as_view(), name='user_delete'),
     path('users/<int:pk>/toggle_active/', views.UserToggleActiveView.as_view(), name='user_toggle_active'),
     path('users/<int:pk>/reset_password/', views.UserResetPasswordView.as_view(), name='user_reset_password'),
+    
+    # 新增：用户层级树状图
+    path('users/hierarchy/', views.UserHierarchyView.as_view(), name='user_hierarchy'),
+    
+    # 新增：全局项目概览
+    path('projects/all/', views.GlobalProjectListView.as_view(), name='global_project_list'),
 ] 

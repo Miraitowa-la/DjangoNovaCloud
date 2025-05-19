@@ -1,0 +1,271 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% load static %}
+
+{% block title %}用户层级结构 - NovaCloud管理面板{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+    .user-tree {
+        margin: 15px 0;
+    }
+    
+    .user-tree ul {
+        padding-left: 25px;
+        list-style-type: none;
+        border-left: 1px solid var(--border-color);
+    }
+    
+    .user-tree li {
+        position: relative;
+        padding: 8px 0;
+    }
+    
+    .user-tree li::before {
+        content: "";
+        position: absolute;
+        top: 14px;
+        left: -25px;
+        width: 20px;
+        height: 1px;
+        background-color: var(--border-color);
+    }
+    
+    .user-node {
+        padding: 8px 12px;
+        border-radius: 4px;
+        border: 1px solid var(--border-color);
+        display: inline-block;
+        background-color: var(--card-bg);
+        box-shadow: 0 1px 3px var(--card-shadow);
+    }
+    
+    .user-node .badge {
+        margin-left: 8px;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: normal;
+    }
+    
+    .badge-info {
+        background-color: var(--primary-color);
+        color: #fff;
+    }
+    
+    .badge-warning {
+        background-color: #e67e22;
+        color: #fff;
+    }
+    
+    .node-actions {
+        display: inline-block;
+        margin-left: 10px;
+    }
+    
+    .user-inactive {
+        opacity: 0.6;
+    }
+    
+    /* 添加展开/折叠功能的样式 */
+    .toggle-btn {
+        cursor: pointer;
+        color: var(--text-color);
+        padding: 0 5px;
+        margin-right: 5px;
+        display: inline-block;
+    }
+    
+    .collapsed .toggle-btn::before {
+        content: "▶";
+    }
+    
+    .expanded .toggle-btn::before {
+        content: "▼";
+    }
+    
+    .collapsed > ul {
+        display: none;
+    }
+    
+    .admin-box-toolbar {
+        margin-bottom: 15px;
+        display: flex;
+        justify-content: flex-end;
+    }
+    
+    /* 深色模式适配 */
+    body.dark-mode .user-tree ul {
+        border-left: 1px solid var(--border-color);
+    }
+    
+    body.dark-mode .user-tree li::before {
+        background-color: var(--border-color);
+    }
+    
+    body.dark-mode .user-node {
+        border: 1px solid var(--border-color);
+        background-color: var(--card-bg);
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="admin-content-header">
+    <h1>{{ title }}</h1>
+    <p>用户层级树状结构图 - 显示用户间的上下级关系</p>
+</div>
+
+<div class="admin-box">
+    <div class="admin-box-title">
+        <h2>用户层级</h2>
+        <div class="search-filter-box">
+            <input type="text" id="userSearch" class="form-control" placeholder="搜索用户..." onkeyup="filterUsers()">
+        </div>
+    </div>
+    
+    <div class="admin-box-toolbar">
+        <button class="btn btn-outline-secondary btn-sm" onclick="expandAll()">全部展开</button>
+        <button class="btn btn-outline-secondary btn-sm" style="margin-left: 10px;" onclick="collapseAll()">全部折叠</button>
+    </div>
+    
+    <div class="admin-box-content">
+        <div class="user-tree">
+            {% if user_tree %}
+                {% include "admin_panel/users/user_tree_node.html" with nodes=user_tree %}
+            {% else %}
+                <div class="empty-state">
+                    <p>没有用户数据可显示</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 初始化树状结构
+document.addEventListener('DOMContentLoaded', function() {
+    // 为所有具有子节点的li添加展开/折叠按钮
+    const listItems = document.querySelectorAll('.user-tree li');
+    
+    listItems.forEach(item => {
+        const childList = item.querySelector('ul');
+        if (childList) {
+            const toggleBtn = document.createElement('span');
+            toggleBtn.className = 'toggle-btn';
+            toggleBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                item.classList.toggle('collapsed');
+                item.classList.toggle('expanded');
+            });
+            
+            const userNode = item.querySelector('.user-node');
+            userNode.parentNode.insertBefore(toggleBtn, userNode);
+            
+            // 默认展开
+            item.classList.add('expanded');
+        }
+    });
+});
+
+// 搜索用户
+function filterUsers() {
+    const input = document.getElementById('userSearch');
+    const filter = input.value.toUpperCase();
+    const userNodes = document.querySelectorAll('.user-node');
+    
+    userNodes.forEach(node => {
+        const text = node.textContent || node.innerText;
+        const li = node.closest('li');
+        
+        if (text.toUpperCase().indexOf(filter) > -1) {
+            // 显示匹配的节点
+            node.style.backgroundColor = 'rgba(52, 152, 219, 0.1)';
+            node.style.borderColor = 'var(--primary-color)';
+            
+            // 确保父节点都展开
+            let parent = li.parentNode;
+            while (parent && parent.tagName === 'UL') {
+                const parentLi = parent.closest('li');
+                if (parentLi) {
+                    parentLi.classList.remove('collapsed');
+                    parentLi.classList.add('expanded');
+                }
+                parent = parentLi ? parentLi.parentNode : null;
+            }
+            
+            li.style.display = '';
+        } else {
+            // 恢复正常样式，但不隐藏（可能包含匹配的子节点）
+            node.style.backgroundColor = '';
+            node.style.borderColor = '';
+            
+            // 如果没有过滤器或是空的，不要隐藏任何节点
+            if (filter === '') {
+                li.style.display = '';
+            }
+        }
+    });
+    
+    // 如果有过滤条件，隐藏没有匹配后代的节点
+    if (filter !== '') {
+        const allLi = document.querySelectorAll('.user-tree li');
+        allLi.forEach(li => {
+            const hasVisibleChild = hasVisibleChildren(li);
+            const node = li.querySelector('.user-node');
+            const text = node.textContent || node.innerText;
+            
+            if (!hasVisibleChild && text.toUpperCase().indexOf(filter) === -1) {
+                li.style.display = 'none';
+            }
+        });
+    }
+}
+
+function hasVisibleChildren(element) {
+    const childList = element.querySelector('ul');
+    if (!childList) return false;
+    
+    const children = childList.querySelectorAll('li');
+    for (let i = 0; i < children.length; i++) {
+        if (children[i].style.display !== 'none') {
+            return true;
+        }
+        if (hasVisibleChildren(children[i])) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// 全部展开
+function expandAll() {
+    const items = document.querySelectorAll('.user-tree li');
+    items.forEach(item => {
+        item.classList.remove('collapsed');
+        item.classList.add('expanded');
+    });
+}
+
+// 全部折叠
+function collapseAll() {
+    const rootItems = document.querySelectorAll('.user-tree > ul > li');
+    rootItems.forEach(item => {
+        const childList = item.querySelector('ul');
+        if (childList) {
+            item.classList.add('collapsed');
+            item.classList.remove('expanded');
+            
+            // 递归折叠所有子节点
+            const children = item.querySelectorAll('li');
+            children.forEach(child => {
+                child.classList.add('collapsed');
+                child.classList.remove('expanded');
+            });
+        }
+    });
+}
+</script>
+{% endblock %} 

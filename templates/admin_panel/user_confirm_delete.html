@@ -4,14 +4,9 @@
 {% block title %}确认删除用户 - NovaCloud{% endblock %}
 
 {% block admin_content %}
-<div class="admin-header">
-    <h2>确认删除用户</h2>
-    <div class="admin-path">
-        <i class="fas fa-home"></i> / 
-        <span>管理面板</span> / 
-        <a href="{% url 'admin_panel:user_list' %}">用户管理</a> /
-        <span>删除用户</span>
-    </div>
+<div class="admin-content-header">
+    <h1>确认删除用户</h1>
+    <p>请确认是否要永久删除该用户账号</p>
 </div>
 
 <div class="admin-box">
@@ -55,8 +50,8 @@
     
     <form method="post">
         {% csrf_token %}
-        <div class="form-buttons">
-            <a href="{% url 'admin_panel:user_detail' user_obj.id %}" class="btn btn-secondary me-2">
+        <div class="action-buttons">
+            <a href="{% url 'admin_panel:user_detail' user_obj.id %}" class="btn btn-secondary">
                 <i class="fas fa-times"></i> 取消
             </a>
             <button type="submit" class="btn btn-danger">
@@ -65,4 +60,23 @@
         </div>
     </form>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+    .action-buttons {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .action-buttons .btn {
+        flex: 1;
+        padding: 10px 15px;
+        font-size: 14px;
+        text-align: center;
+    }
+</style>
 {% endblock %} 
