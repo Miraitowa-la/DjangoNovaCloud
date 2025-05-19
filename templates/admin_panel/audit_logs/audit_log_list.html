@@ -28,14 +28,130 @@
             
             <div class="col-md-3 mb-3">
                 <label for="action">操作类型</label>
-                <select name="action" id="action" class="form-control">
-                    <option value="">全部操作</option>
-                    {% for action_value, action_name in action_choices %}
-                        <option value="{{ action_value }}" {% if selected_action == action_value %}selected{% endif %}>
-                            {{ action_name }}
-                        </option>
-                    {% endfor %}
-                </select>
+                <div class="custom-dropdown-container">
+                    <input type="hidden" name="action" id="action" value="{{ selected_action }}">
+                    <div class="custom-dropdown-select">
+                        <span class="selected-option">
+                            {% if selected_action %}
+                                {% for action_value, action_name in action_choices %}
+                                    {% if selected_action == action_value %}
+                                        {{ action_name }}
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                全部操作
+                            {% endif %}
+                        </span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="custom-dropdown-menu">
+                        <div class="custom-dropdown-option" data-value="" data-group="root">全部操作</div>
+                        
+                        <!-- 用户管理相关操作 -->
+                        <div class="custom-dropdown-group-header" data-group="user">
+                            <i class="fas fa-users"></i> 用户管理
+                            <i class="fas fa-chevron-down toggle-icon"></i>
+                        </div>
+                        <div class="custom-dropdown-group" data-group="user">
+                            {% for action_value, action_name in action_choices %}
+                                {% if 'user_' in action_value or 'role_' in action_value or 'password_' in action_value %}
+                                    <div class="custom-dropdown-option" data-value="{{ action_value }}">{{ action_name }}</div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- 项目相关操作 -->
+                        <div class="custom-dropdown-group-header" data-group="project">
+                            <i class="fas fa-project-diagram"></i> 项目管理
+                            <i class="fas fa-chevron-down toggle-icon"></i>
+                        </div>
+                        <div class="custom-dropdown-group" data-group="project">
+                            {% for action_value, action_name in action_choices %}
+                                {% if 'project_' in action_value %}
+                                    <div class="custom-dropdown-option" data-value="{{ action_value }}">{{ action_name }}</div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- 设备相关操作 -->
+                        <div class="custom-dropdown-group-header" data-group="device">
+                            <i class="fas fa-microchip"></i> 设备管理
+                            <i class="fas fa-chevron-down toggle-icon"></i>
+                        </div>
+                        <div class="custom-dropdown-group" data-group="device">
+                            {% for action_value, action_name in action_choices %}
+                                {% if 'device_' in action_value %}
+                                    <div class="custom-dropdown-option" data-value="{{ action_value }}">{{ action_name }}</div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- 传感器相关操作 -->
+                        <div class="custom-dropdown-group-header" data-group="sensor">
+                            <i class="fas fa-thermometer-half"></i> 传感器管理
+                            <i class="fas fa-chevron-down toggle-icon"></i>
+                        </div>
+                        <div class="custom-dropdown-group" data-group="sensor">
+                            {% for action_value, action_name in action_choices %}
+                                {% if 'sensor_' in action_value %}
+                                    <div class="custom-dropdown-option" data-value="{{ action_value }}">{{ action_name }}</div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- 执行器相关操作 -->
+                        <div class="custom-dropdown-group-header" data-group="actuator">
+                            <i class="fas fa-toggle-on"></i> 执行器管理
+                            <i class="fas fa-chevron-down toggle-icon"></i>
+                        </div>
+                        <div class="custom-dropdown-group" data-group="actuator">
+                            {% for action_value, action_name in action_choices %}
+                                {% if 'actuator_' in action_value %}
+                                    <div class="custom-dropdown-option" data-value="{{ action_value }}">{{ action_name }}</div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- 策略相关操作 -->
+                        <div class="custom-dropdown-group-header" data-group="strategy">
+                            <i class="fas fa-cogs"></i> 策略管理
+                            <i class="fas fa-chevron-down toggle-icon"></i>
+                        </div>
+                        <div class="custom-dropdown-group" data-group="strategy">
+                            {% for action_value, action_name in action_choices %}
+                                {% if 'strategy_' in action_value %}
+                                    <div class="custom-dropdown-option" data-value="{{ action_value }}">{{ action_name }}</div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- 系统相关操作 -->
+                        <div class="custom-dropdown-group-header" data-group="system">
+                            <i class="fas fa-server"></i> 系统管理
+                            <i class="fas fa-chevron-down toggle-icon"></i>
+                        </div>
+                        <div class="custom-dropdown-group" data-group="system">
+                            {% for action_value, action_name in action_choices %}
+                                {% if 'system_' in action_value or 'backup_' in action_value %}
+                                    <div class="custom-dropdown-option" data-value="{{ action_value }}">{{ action_name }}</div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- 其他操作 -->
+                        <div class="custom-dropdown-group-header" data-group="other">
+                            <i class="fas fa-ellipsis-h"></i> 其他操作
+                            <i class="fas fa-chevron-down toggle-icon"></i>
+                        </div>
+                        <div class="custom-dropdown-group" data-group="other">
+                            {% for action_value, action_name in action_choices %}
+                                {% if 'api_' in action_value or 'file_' in action_value %}
+                                    <div class="custom-dropdown-option" data-value="{{ action_value }}">{{ action_name }}</div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <div class="col-md-3 mb-3">
@@ -367,5 +483,277 @@
         margin-bottom: 8px;
         display: block;
     }
+    
+    /* 自定义下拉菜单样式 */
+    .custom-dropdown-container {
+        position: relative;
+        width: 100%;
+    }
+    
+    .custom-dropdown-select {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 38px;
+        padding: 6px 12px;
+        font-size: 14px;
+        line-height: 1.5;
+        border-radius: 4px;
+        border: 1px solid var(--border-color);
+        background-color: var(--input-bg);
+        color: var(--input-text);
+        cursor: pointer;
+        user-select: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    
+    .custom-dropdown-select:hover {
+        border-color: var(--primary-color);
+    }
+    
+    .custom-dropdown-select i.fas.fa-chevron-down {
+        color: #000000 !important;
+        opacity: 0.7;
+    }
+    
+    body.dark-mode .custom-dropdown-select i.fas.fa-chevron-down {
+        color: #000000 !important;
+        opacity: 0.7;
+    }
+    
+    .custom-dropdown-select.active {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.25);
+    }
+    
+    .custom-dropdown-menu {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        max-height: 320px;
+        overflow-y: auto;
+        background-color: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        z-index: 9999;
+        margin-top: 4px;
+        box-shadow: 0 3px 10px var(--shadow-color);
+    }
+    
+    .custom-dropdown-menu.active {
+        display: block;
+    }
+    
+    .custom-dropdown-option {
+        padding: 8px 12px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    
+    .custom-dropdown-option:hover {
+        background-color: var(--feature-card-bg);
+    }
+    
+    .custom-dropdown-option.selected {
+        background-color: rgba(52, 152, 219, 0.15);
+        color: var(--primary-color);
+        font-weight: 500;
+    }
+    
+    .custom-dropdown-group-header {
+        padding: 10px 12px;
+        font-size: 14px;
+        font-weight: 600;
+        background-color: var(--feature-card-bg);
+        border-top: 1px solid var(--border-color);
+        border-bottom: 1px solid var(--border-color);
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        user-select: none;
+        color: var(--text-color);
+    }
+    
+    .custom-dropdown-group-header:first-of-type {
+        border-top: none;
+    }
+    
+    .custom-dropdown-group-header:hover {
+        background-color: var(--border-color);
+    }
+    
+    .custom-dropdown-group-header i:not(.toggle-icon) {
+        margin-right: 8px;
+        width: 16px;
+        text-align: center;
+        color: var(--primary-color);
+    }
+    
+    .custom-dropdown-group {
+        display: none;
+        background-color: var(--input-bg);
+    }
+    
+    .custom-dropdown-group.active {
+        display: block;
+    }
+    
+    .custom-dropdown-group .custom-dropdown-option {
+        padding-left: 36px;
+        position: relative;
+    }
+    
+    /* 缩进美化 */
+    .custom-dropdown-group .custom-dropdown-option:before {
+        content: "";
+        position: absolute;
+        left: 20px;
+        top: 50%;
+        width: 6px;
+        height: 1px;
+        background-color: var(--border-color);
+    }
+    
+    /* 添加箭头旋转动画 */
+    .toggle-icon {
+        transition: transform 0.3s ease;
+    }
+    
+    .custom-dropdown-group-header.active .toggle-icon {
+        transform: rotate(180deg);
+    }
+    
+    /* 深色模式适配 */
+    body.dark-mode .custom-dropdown-select {
+        background-color: var(--input-bg);
+        color: var(--input-text);
+        border-color: var(--input-border);
+    }
+    
+    body.dark-mode .custom-dropdown-menu {
+        background-color: var(--card-bg);
+        border-color: var(--border-color);
+    }
+    
+    body.dark-mode .custom-dropdown-group-header {
+        background-color: var(--feature-card-bg);
+        border-color: var(--border-color);
+    }
+    
+    body.dark-mode .custom-dropdown-option:hover {
+        background-color: var(--feature-card-bg);
+    }
+    
+    body.dark-mode .custom-dropdown-option.selected {
+        background-color: rgba(52, 152, 219, 0.25);
+    }
 </style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 自定义下拉菜单功能
+        const dropdownContainer = document.querySelector('.custom-dropdown-container');
+        const dropdownSelect = document.querySelector('.custom-dropdown-select');
+        const dropdownMenu = document.querySelector('.custom-dropdown-menu');
+        const dropdownOptions = document.querySelectorAll('.custom-dropdown-option');
+        const dropdownGroupHeaders = document.querySelectorAll('.custom-dropdown-group-header');
+        const dropdownGroups = document.querySelectorAll('.custom-dropdown-group');
+        const hiddenInput = document.getElementById('action');
+        const selectedText = document.querySelector('.selected-option');
+        
+        // 初始化选中项
+        const selectedValue = hiddenInput.value;
+        if (selectedValue) {
+            dropdownOptions.forEach(option => {
+                if (option.dataset.value === selectedValue) {
+                    option.classList.add('selected');
+                }
+            });
+        } else {
+            // 默认选中"全部操作"
+            const allOption = document.querySelector('.custom-dropdown-option[data-value=""]');
+            if (allOption) {
+                allOption.classList.add('selected');
+            }
+        }
+        
+        // 打开/关闭下拉菜单
+        dropdownSelect.addEventListener('click', function(e) {
+            e.stopPropagation();
+            dropdownSelect.classList.toggle('active');
+            dropdownMenu.classList.toggle('active');
+            
+            // 如果当前有选中值，展开对应的分组
+            if (selectedValue) {
+                dropdownOptions.forEach(option => {
+                    if (option.dataset.value === selectedValue) {
+                        const group = option.closest('.custom-dropdown-group');
+                        if (group) {
+                            group.classList.add('active');
+                            const header = document.querySelector(`.custom-dropdown-group-header[data-group="${group.dataset.group}"]`);
+                            if (header) {
+                                header.classList.add('active');
+                            }
+                        }
+                    }
+                });
+            }
+        });
+        
+        // 切换分组展开/收起
+        dropdownGroupHeaders.forEach(header => {
+            header.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const groupName = header.dataset.group;
+                const group = document.querySelector(`.custom-dropdown-group[data-group="${groupName}"]`);
+                
+                // 切换当前组的状态
+                header.classList.toggle('active');
+                group.classList.toggle('active');
+            });
+        });
+        
+        // 选择选项
+        dropdownOptions.forEach(option => {
+            option.addEventListener('click', function(e) {
+                e.stopPropagation();
+                
+                // 移除所有选中状态
+                dropdownOptions.forEach(opt => opt.classList.remove('selected'));
+                
+                // 添加当前选中状态
+                option.classList.add('selected');
+                
+                // 更新隐藏输入值和显示文本
+                const value = option.dataset.value;
+                hiddenInput.value = value;
+                selectedText.textContent = option.textContent;
+                
+                // 关闭下拉菜单
+                dropdownSelect.classList.remove('active');
+                dropdownMenu.classList.remove('active');
+                
+                // 自动提交表单
+                document.querySelector('.filter-form').submit();
+            });
+        });
+        
+        // 点击其他地方关闭下拉菜单
+        document.addEventListener('click', function() {
+            dropdownSelect.classList.remove('active');
+            dropdownMenu.classList.remove('active');
+        });
+        
+        // 阻止点击下拉菜单内部元素时关闭菜单
+        dropdownMenu.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    });
+</script>
 {% endblock %} 
