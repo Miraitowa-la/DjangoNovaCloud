@@ -12,11 +12,11 @@
 <div class="admin-box">
     <div class="admin-box-title d-flex justify-content-between align-items-center">
         <h2>用户列表</h2>
-        <div class="d-flex align-items-center">
-            <div class="search-filter-box me-3">
+        <div class="action-bar">
+            <div class="search-filter-box">
                 <input type="text" id="userSearch" class="form-control" placeholder="搜索用户..." onkeyup="filterUsers()">
             </div>
-        <a href="{% url 'admin_panel:user_create' %}" class="btn btn-primary btn-sm">
+            <a href="{% url 'admin_panel:user_create' %}" class="btn btn-primary">
             <i class="fas fa-plus"></i> 创建用户
         </a>
         </div>
@@ -100,6 +100,42 @@
     </div>
 </div>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+    .action-bar {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 15px;
+        justify-content: flex-end;
+    }
+    
+    .search-filter-box {
+        flex: 0 0 250px;
+    }
+    
+    /* 保证在小屏幕上也保持水平排列 */
+    @media (max-width: 768px) {
+        .admin-box-title {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .action-bar {
+            flex-direction: row !important; /* 强制保持水平排列 */
+            width: 100%;
+            margin-top: 15px;
+            justify-content: space-between;
+        }
+        
+        .search-filter-box {
+            flex: 1;
+        }
+    }
+</style>
 {% endblock %}
 
 {% block extra_js %}

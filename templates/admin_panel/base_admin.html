@@ -12,21 +12,21 @@
     
     .admin-sidebar {
         flex: 0 0 250px;
-        padding: 15px;
+        padding: 20px;
         background-color: var(--card-bg);
         border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
-        margin-right: 20px;
+        box-shadow: 0 2px 10px var(--shadow-color);
+        margin-right: 25px;
         margin-bottom: 20px;
         min-height: 600px; /* 设置最小高度确保一致 */
-        border: 1px solid rgba(230, 230, 230, 0.5);
+        border: none;
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
     }
     
     body.dark-mode .admin-sidebar {
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25), 0 1px 3px rgba(0, 0, 0, 0.18);
-        border: 1px solid rgba(60, 60, 60, 0.5);
+        box-shadow: 0 2px 10px var(--shadow-color);
+        border: none;
     }
     
     .admin-content {
@@ -95,26 +95,26 @@
     .admin-box {
         background-color: var(--card-bg);
         border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
-        padding: 20px;
-        margin-bottom: 20px;
-        border: 1px solid rgba(230, 230, 230, 0.5);
+        box-shadow: 0 2px 10px var(--shadow-color);
+        padding: 25px;
+        margin-bottom: 25px;
+        border: none;
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
         transition: box-shadow 0.3s ease;
     }
     
     .admin-box:hover {
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15), 0 2px 5px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 15px var(--shadow-color);
     }
     
     body.dark-mode .admin-box {
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25), 0 1px 3px rgba(0, 0, 0, 0.18);
-        border: 1px solid rgba(60, 60, 60, 0.5);
+        box-shadow: 0 2px 10px var(--shadow-color);
+        border: none;
     }
     
     body.dark-mode .admin-box:hover {
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35), 0 2px 5px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 4px 15px var(--shadow-color);
     }
     
     .admin-box-title {
@@ -129,19 +129,20 @@
     }
     
     .admin-content-header {
-        margin-bottom: 20px;
+        margin-bottom: 25px;
         padding-bottom: 15px;
-        border-bottom: 1px solid var(--border-color);
         background-color: var(--card-bg);
-        border-radius: 10px;
-        padding: 20px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        border: 1px solid rgba(230, 230, 230, 0.5);
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 2px 10px var(--shadow-color);
+        border: none;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
     }
     
     body.dark-mode .admin-content-header {
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        border: 1px solid rgba(60, 60, 60, 0.5);
+        box-shadow: 0 2px 10px var(--shadow-color);
+        border: none;
     }
     
     .admin-content-header h1 {
@@ -173,7 +174,7 @@
     .table {
         border-collapse: separate;
         border-spacing: 0;
-        border-radius: 8px;
+        border-radius: 10px;
         overflow: hidden;
         border: 1px solid var(--border-color);
         margin-bottom: 0;
@@ -186,14 +187,14 @@
     
     .table th {
         border-bottom: 2px solid var(--border-color);
-        padding: 12px 10px;
+        padding: 14px 12px;
         font-weight: 600;
         text-align: left;
         color: var(--text-color);
     }
     
     .table td {
-        padding: 12px 10px;
+        padding: 12px 12px;
         border-bottom: 1px solid var(--border-light);
         color: var(--text-color);
     }
