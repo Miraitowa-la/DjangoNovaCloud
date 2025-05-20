@@ -37,6 +37,7 @@ class UserListView(LoginRequiredMixin, AdminRequiredMixin, ListView):
     model = User
     template_name = 'admin_panel/user_list.html'
     context_object_name = 'users'
+    paginate_by = 10  # 每页显示10条记录
     
     def get_queryset(self):
         # 只显示当前管理员的下级用户
@@ -48,6 +49,15 @@ class UserListView(LoginRequiredMixin, AdminRequiredMixin, ListView):
             return User.objects.filter(
                 profile__parent_user=self.request.user
             ).order_by('-date_joined')
+            
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # 保存当前查询字符串，便于分页使用
+        query_params = self.request.GET.copy()
+        if 'page' in query_params:
+            del query_params['page']
+        context['query_string'] = query_params.urlencode()
+        return context
 
 # 用户创建视图
 class UserCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
@@ -266,6 +276,7 @@ class GlobalProjectListView(LoginRequiredMixin, AdminRequiredMixin, ListView):
     model = Project
     template_name = 'admin_panel/projects/global_project_list.html'
     context_object_name = 'projects'
+    paginate_by = 10  # 每页显示10条记录
     
     def get_queryset(self):
         """根据管理员权限返回可管理的项目"""
@@ -284,6 +295,13 @@ class GlobalProjectListView(LoginRequiredMixin, AdminRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['title'] = '全局项目'
         context['is_admin_view'] = True
+        
+        # 保存当前查询字符串，便于分页使用
+        query_params = self.request.GET.copy()
+        if 'page' in query_params:
+            del query_params['page']
+        context['query_string'] = query_params.urlencode()
+        
         return context
 
 # 审计日志列表视图
@@ -292,7 +310,7 @@ class AuditLogListView(LoginRequiredMixin, AdminRequiredMixin, ListView):
     model = AuditLog
     template_name = 'admin_panel/audit_logs/audit_log_list.html'
     context_object_name = 'logs'
-    paginate_by = 50  # 每页显示50条日志
+    paginate_by = 10  # 每页显示10条日志
     
     def get_queryset(self):
         """根据筛选条件返回审计日志"""

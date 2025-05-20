@@ -290,6 +290,24 @@
                             <li class="page-item">
                                 <a class="page-link" href="?page={{ i }}{% if query_string %}&{{ query_string }}{% endif %}">{{ i }}</a>
                             </li>
+                        {% elif i == 1 %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if query_string %}&{{ query_string }}{% endif %}">1</a>
+                            </li>
+                            {% if page_obj.number > 4 %}
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                            {% endif %}
+                        {% elif i == paginator.num_pages %}
+                            {% if page_obj.number < paginator.num_pages|add:"-3" %}
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                            {% endif %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ paginator.num_pages }}{% if query_string %}&{{ query_string }}{% endif %}">{{ paginator.num_pages }}</a>
+                            </li>
                         {% endif %}
                     {% endfor %}
                     
@@ -340,25 +358,6 @@
         display: flex;
         justify-content: flex-end;
         gap: 10px;
-    }
-    
-    .pagination-container {
-        display: flex;
-        justify-content: center;
-        margin-top: 20px;
-    }
-    
-    .page-item.active .page-link {
-        background-color: var(--primary-color);
-        border-color: var(--primary-color);
-    }
-    
-    .page-link {
-        color: var(--primary-color);
-    }
-    
-    .page-link:hover {
-        color: var(--secondary-color);
     }
     
     .badge {
