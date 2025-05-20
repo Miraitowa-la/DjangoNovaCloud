@@ -160,19 +160,45 @@
             
             <div class="parent-user-info">
                 {% if user_obj.profile.parent_user %}
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-user-tie fa-2x text-primary"></i>
+                    <div class="parent-user-card">
+                        <div class="parent-user-header">
+                            <div class="parent-user-name">
+                                <i class="fas fa-user-tie"></i>
+                                <span>{{ user_obj.profile.parent_user.username }}</span>
+                            </div>
+                            <div class="parent-user-badge">
+                                {% if user_obj.profile.parent_user.is_staff %}
+                                    <span class="admin-badge">管理员</span>
+                                {% endif %}
+                            </div>
                         </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h5 class="mb-1">{{ user_obj.profile.parent_user.username }}</h5>
-                            <p class="mb-0 text-muted">{{ user_obj.profile.parent_user.email }}</p>
+                        
+                        <div class="parent-user-details">
+                            <p class="parent-user-email">
+                                <i class="fas fa-envelope"></i> {{ user_obj.profile.parent_user.email|default:"无邮箱" }}
+                            </p>
+                        </div>
+                        
+                        <div class="parent-user-actions">
+                            <a href="{% url 'admin_panel:user_detail' user_obj.profile.parent_user.id %}" class="parent-user-action-btn">
+                                <i class="fas fa-eye"></i> 查看上级用户
+                            </a>
                         </div>
                     </div>
                 {% else %}
-                    <div class="empty-state text-center py-3">
-                        <i class="fas fa-user-tie fa-2x text-muted mb-3"></i>
-                        <p>无上级用户</p>
+                    <div class="empty-parent-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <div class="empty-text">
+                            <p>无上级用户</p>
+                            <small>该用户没有设置上级用户</small>
+                        </div>
+                        <div class="empty-action">
+                            <a href="{% url 'admin_panel:user_update' user_obj.id %}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-user-plus"></i> 设置上级用户
+                            </a>
+                        </div>
                     </div>
                 {% endif %}
             </div>
@@ -336,6 +362,112 @@
         .account-action-buttons .btn {
             width: 100%;
         }
+    }
+    
+    /* 上级用户样式 */
+    .parent-user-card {
+        background-color: var(--feature-card-bg);
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 2px 4px var(--shadow-color);
+        transition: all 0.3s ease;
+    }
+    
+    .parent-user-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px var(--shadow-color);
+    }
+    
+    .parent-user-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+    
+    .parent-user-name {
+        display: flex;
+        align-items: center;
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: var(--primary-color);
+    }
+    
+    .parent-user-name i {
+        margin-right: 8px;
+        font-size: 1rem;
+    }
+    
+    .parent-user-badge {
+        display: flex;
+        align-items: center;
+    }
+    
+    .admin-badge {
+        background-color: var(--accent-color);
+        color: white;
+        border-radius: 12px;
+        padding: 2px 10px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+    }
+    
+    .parent-user-details {
+        margin-bottom: 15px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .parent-user-email {
+        color: var(--text-color);
+        font-size: 0.9rem;
+        margin-bottom: 0;
+        display: flex;
+        align-items: center;
+    }
+    
+    .parent-user-email i {
+        margin-right: 8px;
+        color: var(--text-secondary);
+    }
+    
+    .parent-user-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 10px;
+    }
+    
+    .parent-user-action-btn {
+        display: inline-flex;
+        align-items: center;
+        color: var(--primary-color);
+        text-decoration: none;
+        font-size: 0.9rem;
+        padding: 5px 10px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+    }
+    
+    .parent-user-action-btn:hover {
+        background-color: rgba(52, 152, 219, 0.1);
+        color: var(--secondary-color);
+    }
+    
+    .parent-user-action-btn i {
+        margin-right: 5px;
+    }
+    
+    /* 空上级用户状态样式 */
+    .empty-parent-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px 15px;
+        text-align: center;
+        background-color: var(--feature-card-bg);
+        border-radius: 8px;
+        border: 1px dashed var(--border-color);
     }
 </style>
 {% endblock %} 

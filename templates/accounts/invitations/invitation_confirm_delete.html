@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}删除邀请码 - NovaCloud{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="content-section">
+        <div class="section-header">
+            <h1>删除邀请码</h1>
+            <div class="header-actions">
+                <a href="{% url 'accounts:invitation_list' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> 返回列表
+                </a>
+            </div>
+        </div>
+        
+        <div class="admin-box">
+            <div class="admin-box-content">
+                <div class="alert alert-danger">
+                    <h2 class="alert-heading">确认删除</h2>
+                    <p>您确定要删除此邀请码吗？此操作无法撤销。</p>
+                </div>
+                
+                <div class="inviation-info mb-4">
+                    <h3>邀请码信息</h3>
+                    <div class="detail-row">
+                        <div class="detail-label">邀请码</div>
+                        <div class="detail-value">{{ invitation.code }}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">创建时间</div>
+                        <div class="detail-value">{{ invitation.created_at|date:"Y-m-d H:i" }}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">过期时间</div>
+                        <div class="detail-value">
+                            {% if invitation.expires_at %}{{ invitation.expires_at|date:"Y-m-d H:i" }}{% else %}永不过期{% endif %}
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">使用情况</div>
+                        <div class="detail-value">
+                            已使用 {{ invitation.times_used }} 次
+                            {% if invitation.max_uses %} / 最多 {{ invitation.max_uses }} 次{% endif %}
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">状态</div>
+                        <div class="detail-value">
+                            {% if invitation.is_active %}
+                                <span class="badge bg-success">有效</span>
+                            {% else %}
+                                <span class="badge bg-secondary">已失效</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <form method="post" action="">
+                    {% csrf_token %}
+                    <div class="button-group">
+                        <button type="submit" class="btn btn-danger">确认删除</button>
+                        <a href="{% url 'accounts:invitation_list' %}" class="btn btn-secondary">取消</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

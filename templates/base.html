@@ -25,6 +25,9 @@
                         <li><a href="{% url 'admin_panel:user_list' %}">管理面板</a></li>
                         {% endif %}
                         <li>
+                            <a href="{% url 'accounts:invitation_list' %}">邀请码</a>
+                        </li>
+                        <li>
                             <form method="post" action="{% url 'accounts:logout' %}" class="logout-form">
                                 {% csrf_token %}
                                 <button type="submit" class="logout-btn">退出登录</button>

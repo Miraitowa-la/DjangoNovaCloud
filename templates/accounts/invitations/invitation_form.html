@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}创建邀请码 - NovaCloud{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="content-section">
+        <div class="section-header">
+            <h1>创建邀请码</h1>
+            <div class="header-actions">
+                <a href="{% url 'accounts:invitation_list' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> 返回列表
+                </a>
+            </div>
+        </div>
+        
+        <div class="admin-box">
+            <div class="admin-box-title">
+                <h2>创建新邀请码</h2>
+            </div>
+            
+            <form method="post" action="">
+                {% csrf_token %}
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.max_uses.id_for_label }}">使用上限</label>
+                            {{ form.max_uses }}
+                            <small class="form-text text-muted">留空或设为0表示无限制使用次数</small>
+                            {% if form.max_uses.errors %}
+                                <div class="field-error">{{ form.max_uses.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.expires_at.id_for_label }}">过期时间</label>
+                            {{ form.expires_at }}
+                            <small class="form-text text-muted">留空表示永不过期</small>
+                            {% if form.expires_at.errors %}
+                                <div class="field-error">{{ form.expires_at.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 快速选择常用过期时间 -->
+                <div class="mb-4">
+                    <label>快速选择过期时间</label>
+                    <div class="quick-expires-options">
+                        <button type="button" class="btn btn-outline-primary btn-sm set-expiry" data-expiry="1d">1天</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm set-expiry" data-expiry="7d">7天</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm set-expiry" data-expiry="30d">30天</button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm clear-expiry">清除</button>
+                    </div>
+                </div>
+                
+                <!-- 快速选择常用使用次数 -->
+                <div class="mb-4">
+                    <label>快速选择使用次数</label>
+                    <div class="quick-uses-options">
+                        <button type="button" class="btn btn-outline-primary btn-sm set-uses" data-uses="1">1次</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm set-uses" data-uses="5">5次</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm set-uses" data-uses="10">10次</button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm clear-uses">无限次</button>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">创建邀请码</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .quick-expires-options,
+    .quick-uses-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    input[type="datetime-local"] {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background-color: var(--input-bg);
+        color: var(--input-text);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 快速设置过期时间
+        const expiryButtons = document.querySelectorAll('.set-expiry');
+        const expiryField = document.getElementById('{{ form.expires_at.id_for_label }}');
+        const clearExpiryButton = document.querySelector('.clear-expiry');
+        
+        // 预设的过期时间选项
+        const expiryOptions = {
+            '1d': '{{ expires_options.1d|date:"Y-m-d\TH:i" }}',
+            '7d': '{{ expires_options.7d|date:"Y-m-d\TH:i" }}',
+            '30d': '{{ expires_options.30d|date:"Y-m-d\TH:i" }}',
+        };
+        
+        // 点击过期时间选项
+        expiryButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const expiry = this.getAttribute('data-expiry');
+                expiryField.value = expiryOptions[expiry];
+                
+                // 更新选中状态
+                expiryButtons.forEach(btn => btn.classList.remove('btn-primary'));
+                expiryButtons.forEach(btn => btn.classList.add('btn-outline-primary'));
+                this.classList.remove('btn-outline-primary');
+                this.classList.add('btn-primary');
+            });
+        });
+        
+        // 清除过期时间
+        clearExpiryButton.addEventListener('click', function() {
+            expiryField.value = '';
+            expiryButtons.forEach(btn => btn.classList.remove('btn-primary'));
+            expiryButtons.forEach(btn => btn.classList.add('btn-outline-primary'));
+        });
+        
+        // 快速设置使用次数
+        const usesButtons = document.querySelectorAll('.set-uses');
+        const usesField = document.getElementById('{{ form.max_uses.id_for_label }}');
+        const clearUsesButton = document.querySelector('.clear-uses');
+        
+        // 点击使用次数选项
+        usesButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const uses = this.getAttribute('data-uses');
+                usesField.value = uses;
+                
+                // 更新选中状态
+                usesButtons.forEach(btn => btn.classList.remove('btn-primary'));
+                usesButtons.forEach(btn => btn.classList.add('btn-outline-primary'));
+                this.classList.remove('btn-outline-primary');
+                this.classList.add('btn-primary');
+            });
+        });
+        
+        // 清除使用次数（设为无限）
+        clearUsesButton.addEventListener('click', function() {
+            usesField.value = '';
+            usesButtons.forEach(btn => btn.classList.remove('btn-primary'));
+            usesButtons.forEach(btn => btn.classList.add('btn-outline-primary'));
+        });
+    });
+</script>
+{% endblock %} 
